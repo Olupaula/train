@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block link %}
+    {% if user.is_authenticated %}
+        <link type="text/css" rel="stylesheet" href="{% static 'style/home_after_login.css' %}">
+    {% else %}
+         <link type="text/css" rel="stylesheet" href="{% static 'style/home.css' %}">
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+{% if user.is_authenticated %}
+<style>
+    @font-face{
+        font-family: open_sans;
+        src: url("{% static 'fonts/Open_Sans/static/OpenSans/OpenSans-Regular.ttf' %}") format('truetype');
+    }
+
+    @font-face{
+        font-family: open_sans;
+        font-weight: bold;
+        src: url("{% static 'fonts/Open_Sans/static/OpenSans/OpenSans-Bold.ttf' %}") format('truetype');
+    }
+
+    @font-face{
+        font-family: open_sans_light;
+        src: url("{% static 'fonts/Noto_Sans/NotoSans-Light.ttf' %}") format('truetype');
+    }
+
+    .post p {
+        font-family: open_sans;
+        font-size: 16px;
+    }
+
+    .post #post_author {
+       font-family: open_sans;
+       font-weight: bold;
+       font-size: 14px;
+    }
+
+    .post #credentials_ {
+       font-family: open_sans_light;
+       font-size: 14px;
+       color: rgb(30,30,30);
+    }
+</style>
+<div class="nav_and_section" >
+    <div class="nav_nav">
+        <div><a href="{% url 'create_forum' %}"><span style="margin-right:30px; display:inline-block; background: rgb(190,190,190); padding:5px 20px 5px 20px;">+</span>Create Train</a></div>
+        {% for forum in forums %}
+            <div>
+                <a href="{% url 'forum' forum.id %}">{{forum}}</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="section">
+        <div class="pre_section">
+            {% comment %}
+                <h3> Welcome {{user.name}} </h3>
+                <h4> This App does a Sentiment Analysis on a Piece of Imputed Text</h4>
+            {% endcomment %}
+
+            <div class="pre_section_search" >
+                    {% if user.avatar.url != '/images/view.png' %}
+                       <div style="position: absolute; display: inline-block;">
+                           <img style="display: inline-block; margin-top: 45px; border-radius:
+                           50%; margin-left:1px; margin-top: 1px; " src="{{user.avatar.url}}"
+                                height="40px" width="40px" >
+                       </div>
+                    {% else %}
+                        <div id="profile_circle" class="profile_circle" user_initial={{user.username}}
+                             style="margin-right: -40px; margin-top: 5px; ">
+                            <div id="user_initial"  class="home_profile_div_first" style="font-family: open_sans;">
+                                {{user.username}}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                <div style="display: inline-block; margin-left: 50px; margin-top: 10px; position: absolute; width:55%">
+                    <input type="search" placeholder="What do you want to share?" disabled>
+                </div>
+            </div>
+            <div id="pre_section_2" >
+                   <span id="questions">
+                       <a>
+                           <img src="{% static 'images/question-1.png' %}" height="17px" width="17px">
+                           Ask
+                       </a>
+                   </span>
+
+                   <span>
+                       <a href="{% url 'answer_question' %}">
+                           <img src="{% static 'images/answer.png' %}" height="17px" width="17px">Answer
+                       </a>
+                   </span>
+                   <span id="non-forum-post">
+                       <img src="{% static 'images/edit.png' %}" height="17px" width="17px">Post
+                   </span>
+            </div>
+
+        </div>
+        {# A Selection of  the first 5 messages from each forum. Would later be a Random selection. #}
+        {% for post in posts %}
+           {# {% if user != post.author %} #}
+                <div class="post" >
+                    {% for user_ in users %}
+                        {% if user_ == post.author %}
+                            {% if user_.avatar.url != '/images/view.png' %}
+                                <img src="{{user_.avatar.url}}" style="border-radius: 50%; position: absolute; " width="35px" height="35px">
+                            {% else %}
+                                <div class="profile_circle" style="margin-left: -0.05px; margin-right: -40px;">
+                                    <div class="home_profile_div" >{{user_}}</div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    <span id="post_author"  style="margin-left: 50px;">{{post.author}}</span>
+
+                    {# follow button #}
+                    <form {# action="{% url 'update_followers' post.author_id  post.forum_id 1 %}" #} method="POST">
+                        {% csrf_token %}
+                        <button  id="follow" type="submit" name="author_id" value="{{post.author_id}}" class="btnprimary">
+                               follow
+                        </button>
+                    </form>
+
+                    {% for emc in emc %}
+                        {% if emc.user_em.id == post.author_id %}
+                        <br>
+                        <span id="credentials_" style="margin-left: 50px;">{{emc.position}} at {{emc.company_organization}} ({{emc.start_year|date:'Y'}} - {{emc.end_year|date:'Y'}})</span>
+                        {% endif %}
+                    {% endfor %}
+
+                    <small id="time_posted"> . {{post.created|timesince}}</small>
+
+                    <p>{{post.message}}</p>
+
+                    {# image #}
+                    <div style="text-align: center; margin:0; padding:0;">
+                        {% for image in images %}
+                        {% if image.message_id == post.id %}
+                            <img src={{image.image.url}} height="70%" width="300px">
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+
+                    {# like button #}
+                    <form  {# action="{% url 'update_like' post.id post.forum_id 1 %}" #} method="POST">
+                        {% csrf_token %}
+                        <button type="submit" name="post_id" value="{{post.id}}" class="btnprimary">
+                               <img src="{% static 'images/like.png' %}" height="20px" width="20px" >
+                        </button>
+                        <small>  {{post.likes_total}} </small>
+                    </form>
+
+                    {# comment button:  the button that opens the comment box and comments #}
+                    <button id={{post.id}} onclick="showHideForm('{{post.id}}', '{{post.id}}a', 'Comment')"> <img src="{% static 'images/speech-bubble.png' %}" height="20px" width="20px" > </button>
+
+                    <div id={{post.id}}a style="display:none">
+                        <form   action="{% url 'comments' post.author_id   %}" method="POST">
+                            {% csrf_token %}
+                            {{comment_form}}
+                            <small> <input type="submit"></small>
+                        </form>
+                        {# comments #}
+                        {% for comment in comments %}
+                            {% if comment.message_id == post.id %}
+                                <div style="background:yellow; margin-left:20px;" >
+                                    <p><small>{{comment.commenter}}</small></p>
+                                    <p>{{comment.comment}}</p>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+
+                </div>
+           {# {% endif %} #}
+        {% endfor %}
+    </div>
+
+
+</div>
+<script src="{% static 'javascript/home_after_login.js' %}"> </script>
+{% else %}
+  <div id="new_bees">
+      <h1>D-Chatters</h1>
+      <h4>A place to Discuss a variety of topics and get better understanding</h4>
+      <p id="policy">By continuing, you indicate that you agree to Chatter's Term of Service and Privacy Policy</p>
+
+      <div id="sign_up_login">
+          <p id="login_p"><a href="{% url 'login' %}">Login</a></p>
+          <p id="sign_up_p"><a href="{% url 'register_user' %}">Sign up with email</a></p>
+      </div>
+
+      <div id="others">
+          <div><p>About</p></div>
+          <div><p>Carriers</p></div>
+          <div><p>Languages</p></div>
+          <div><p>@ OPaul Studio, Inc. 2022</p></div>
+      </div>
+
+
+  </div>
+
+</div>
+    {% endif %}
+{% endblock %}
+
+
+
+
+<!-- <form  method="POST">
+        {% csrf_token %}
+        <label> Enter Text</label><br>
+        <input type="text" name="text"><br>
+        <input type="submit">
+    </form>
+
+    {% for member in members %}
+        <p>{{member.name}} </p>
+    {% endfor %}
+
+
+    {% if result.isspace == False %}
+        <p> This text is {{result}} </p>
+    {% endif %}
+-->

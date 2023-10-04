@@ -1,0 +1,1394 @@
+// this takes care of the django csrf-token
+var like_forms
+like_forms = [...document.getElementsByClassName("like_form")]
+
+var csrf = document.getElementsByName("csrfmiddlewaretoken")
+console.log('csrf', csrf)
+
+const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+// Dates are used for setting the time from django's JsonResponse to javascript
+months =["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"]
+
+//1) Takes care of creating a new message
+//{ A LISTENER IS ADDED TO FORM WITH ID="FORM" TO CREATE A NEW MESSAGE SUBMISSION USING AJAX
+// comment_no is part of the id of each form that is created by ajax
+comment_no = 1
+
+// the message form
+form = document.getElementById("form")
+
+form.addEventListener('click', e=>{
+    //displaying the message box
+    showMessageBox("create_or_edit_message_box")
+    let closer = document.getElementById("create_or_edit_message_box_closer")
+
+    // closing the message box using the close button
+    closer.addEventListener("click", e=>{
+        closeMessageBox()
+    })
+
+    var form_ = document.getElementById("create_or_edit_message_form")
+
+    form_.addEventListener('submit', e=>{
+        e.preventDefault();
+
+        forum_div = document.getElementById("current_forum")
+        forum_id = forum_div.getAttribute("forum_id")
+        console.log("this", this)
+        console.log(forum_id)
+        //console.log("body", $('#message_box').val())
+        // Takes care of creating a new message
+
+        //let form_ = document.getElementById("create_or_edit_message_form")
+        //let form = form_
+       // alert($("#create_or_edit_message_body").get(0).value)
+        //var formData = new FormData($("#create_or_edit_message_form"))
+        $.ajax({
+            type:'POST',
+            url: "/create_new_message/",
+            data:  //formData,
+                    {
+                        body: $('#create_or_edit_message_body').val(),
+                        //description: $('#description').val(),
+                        file: $("#input_upload_image").val(),
+                        "csrfmiddlewaretoken": csrf[0].value,
+
+                        //comment: comment
+                    },
+            success: function(response){
+
+                // closing the message box when the save button is clicked
+                closeMessageBox()
+
+                message = response.message[0]
+                console.log(message.forum_id,forum_id)
+                if (message.forum_id == forum_id){
+                    displayMessageByUser(response)
+                    console.log("Cm", "successful")
+                }
+                //else if (message.author != message.user & message.forum_id == forum_id){
+                    //displayMessageByUser(response)
+                //}
+
+            },
+            error: function(error){
+                console.log(error)
+            }
+
+            contentType: false,
+            processData: false
+        });
+
+
+    })
+
+
+})
+
+
+
+
+// (1a) Takes care of messages posted by current user
+function displayMessageByUser(response){
+    const data = response.message
+    const emc = response.author_credential
+     //console.log (emc)
+        // emc is employment credential
+
+        data.forEach( (message) => {
+            emc.forEach( (emc)=>{
+                date = new Date(message.created)
+                mother = document.getElementById("s")
+                if(mother==null){
+                mother = document.createElement("hr")
+                mother.setAttribute("id", "s")
+                }
+
+                console.log(mother)
+                messageHtml(mother, message, emc)
+                addCommentToNewMessage(response)
+                message_menu_opener()
+            })
+        })
+
+      //addComment(response)
+      //likeUnlike(response)
+      document.getElementById("form").reset()
+      comment_no+=1
+
+}
+
+
+
+// Handles the html part of creating a new message
+function messageHtml(mother, message, emc){
+
+    mother.insertAdjacentHTML('afterbegin',
+         // NEW MESSAGE AND ITS PROPERTIES
+        `<div id="conversation_${message.post_id}" class="post" >
+             <!--// message-->
+              <div class="author_details" postid_='${message.post_id}'>
+
+                    <!--// displaying author's name -->
+                     <span><b>${message.author}</b></span>
+
+                     <!--//follow buttons -->
+                    ${message.user != message.author?
+                        `<form  id="follow" leader_id={{post.author_id}} _forum_id_={{forum.id}} class="follow_form"
+                            method="POST">
+                            <input type="hidden" name="csrfmiddlewaretoken" value=${csrftoken}>
+                            <button id="mb" class={{post.author_id}}fb type="submit" name="author_id"
+                                value="{{post.author_id}}" >
+                                   follow
+                            </button>
+                            <small class="{{post.author_id}}nf">
+                                <!-- {% for leader in leaders %}-->
+                                     <!--{% if leader.leader_id == post.author_id %} -->
+                                        <i> leader.followers_total followers </i>
+                                     <!-- {% endif %} -->
+                                 <!-- {% endfor %} -->
+                            </small>
+                        </form>` : ``
+                    }
+
+                    <!-- //delete button -->
+                     ${message.author == message.user?
+                         `<form  style="float:right; margin-left:30px;" class="delete_message" postId={{post.id}} >
+                             <input type="hidden" name="csrfmiddlewaretoken" value=${csrftoken}>
+                             <button>
+                                 <img src="/static/images/close.png"  height="12px" width="12px">
+                             </button>
+                         </form>` : ``
+                      }
+
+                     <!--// other menus like edit etc -->
+                     <img class="message_menu" id="message_menu_${message.post_id}" src="/static/images/menu(1).png" style="float:right;"  height="20px" width="20px">
+                     <br>
+
+                     <!--// author's credential -->
+                     <span id="credential">
+                        ${ emc.position?
+                             `
+                              <b> ${emc.position} at ${emc.company_organization} (${emc.start_year} ${emc.end_year !=null? `- ${emc.end_year}`:`` }) </b>
+                             `
+                             :
+
+                             ``
+                         }
+                     </span>
+
+                 <!-- // time  posted-->
+                 <small>${message.timesince}</small>
+                 <!--<small>${months[date.getMonth()]}. ${date.getDate()}, ${date.getFullYear()}</small> -->
+            </div>
+
+
+
+             <!-- //Actual Message (body)-->
+             <p id=post_body_${message.post_id}>${message.body}</p>
+
+             <!--// like button-->
+             <!-- NB: The acronyms {b: button, lb: like button, lf: like form, cf: comment form, sl: show like} -->
+             <form class="like_form"
+             forum_id='${message.forum_id}'
+             message_id='${message.post_id}'
+             src1 ="/static/images/like.png"
+             src2 ="/static/images/thumb-up.png"
+             method='POST'>
+                <input type='hidden' name='csrfmiddlewaretoken' value='${csrftoken}'>
+                <button id='${message.post_id}lb' type='submit' name='post_id' value='${message.post_id}' class='btnprimary'>
+                    <img src="/static/images/like.png"  height="20px" width="20px">
+                </button>
+                <small id="${message.post_id}sl"> . ${message.likes_total} Likes </small>
+             </form>
+
+             ${ message.user != message.author?
+                    `{# follow button #}
+                    <form action="{% url 'update_followers' post.author_id  post.forum_id  2 %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" name="author_id" value="{{post.author_id}}" class="btnprimary">
+                               follow
+                        </button>
+                    </form>` : ``
+             }
+             <!--// comment button-->
+            <div class="comment_holder_div" id='comment_holder_div_${message.post_id}'>
+                <button id="${message.post_id}b"
+                onclick="showHideForm('${message.post_id}b','${message.post_id}cf','Comment', 'comment_holder_div_${message.post_id}')"
+                src1="/static/images/speech-bubble.png" src2="/static/images/speech-bubble.png"
+                >
+                    <img src="/static/images/speech-bubble.png"  height="20px" width="20px">
+                </button>
+                <form id="${message.post_id}cf" text_area_id="${message.post_id}" style="display:none;" method="POST">
+                    <div class="comment_impute">
+                        <textarea id="${message.post_id}"></textarea>
+                        <button>
+                            <img src="/static/images/send-message.png"  height="20px" width="20px">
+                        </button>
+                     </div>
+                </form>
+                <!-- //not to be used <small id="jbc_on_${message.post_id}" >${date.getHours()}:${date.getMinutes()}
+                 ${date.getHours()>=12? "p.m.": "a.m."} </small> -->
+            </div>
+        <div>
+
+
+       `
+    )
+    like_forms = [...document.getElementsByClassName("like_form")]
+    likeSingleMessage()
+    //if (message.author_id != message.user) { updateAllLikes() }
+
+}
+
+
+// 2) This takes care of imputing and outputting comments from already existing messages to screen in Ajax format
+function addCommentToExistingMessages(){
+    var comment_forms = [...document.getElementsByClassName("comment_form")]
+    comment_forms.forEach(forms=>{
+       forms.addEventListener('submit', e=>{
+            submittedMessageId = e.target.getAttribute("text_area_id")
+            comment = document.getElementById(submittedMessageId)
+            e.preventDefault()
+            $.ajax({
+                type: 'POST',
+                url: `/comments/${submittedMessageId}/`,
+                data: {
+                    comment: comment.value,
+                    //comment_: JSON.stringify({comment: comment.value()}),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                },
+                dataType: 'json',
+                success: function(response){
+
+                     ///addComment(response)
+                    inserter= document.getElementById(`jbc_on_${response.comment[0].post_id}`)
+                    inserter.insertAdjacentHTML("afterbegin",`
+                    <div class='${submittedMessageId}cdiv comment_display'>
+                        <p><small><b>${response.comment[0].author}</small></b></p>
+                        <p>${response.comment[0].comment}</p>
+                    </div>`)
+                    console.log(response)
+                    console.log(response.comment[0].comment)
+                },
+
+                error: function(error){
+                    console.log(e.target.parentNode)
+                }
+            })
+       })
+    })
+}
+addCommentToExistingMessages()
+
+
+// 3) Add comment comments on new message
+function addCommentToNewMessage(response){
+    message = response.message[0]
+    //console.log(response)
+// Takes care of adding comments on the new message
+    form_ = document.getElementById(`${message.post_id}cf`)
+    if(form_ != null){
+    // console.log(form_)
+        form_.addEventListener('submit', e_=> {
+            e_.preventDefault()
+            submittedMessageId = `${message.post_id}`
+            //console.log(submittedMessageId)
+            comment = document.getElementById(submittedMessageId)
+
+            console.log(comment)
+
+            if (comment != null){
+            // console.log(comment.value)
+                $.ajax({
+                    type: 'POST',
+                    url: `/comments/${submittedMessageId}/`,
+                    data: {
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                        comment: comment.value,
+                        //csrfmiddlewaretoken: csrftoken,
+                    },
+                    success: function(response){
+                        console.log(response)
+                        inserter= document.getElementById(`jbc_on_${response.comment[0].post_id}`)
+                        inserter.insertAdjacentHTML("afterbegin",`
+                        <div class='${submittedMessageId}cdiv comment_display'>
+                                <p>${response.comment[0].author}</p>
+                                <p><small><i>${response.comment[0].comment}</i></small></p>
+                        </div>`)
+                        console.log(response)
+                        console.log(response.comment[0].comment)
+                        form_.reset()
+                    },
+                    error: function(error){
+                        console.log(error)
+                    }
+                })
+            }
+        })
+    }
+
+}
+
+
+// 5) Takes care of liking already existing messages NB: lbe means "like button for existing an message"
+function likeSingleMessage(){
+    like_forms.forEach(function(form){
+        form.addEventListener('submit', function(e){
+            e.preventDefault()
+
+            // attributes for message ( or post)
+            messageId = e.target.getAttribute('message_id') // this attribute belongs to the like_form
+            console.log(messageId)
+            likeButton = document.getElementById(`${messageId}lb`)
+            forumId = e.target.getAttribute("forum_id")
+
+           // attributes for image
+            let src1 = e.target.getAttribute("src1")
+            let src2 = e.target.getAttribute("src2")
+
+            $.ajax({
+                type: 'POST',
+                url: `/update_like/${messageId}/${forumId}/1`,
+                data: {
+                    post_id: messageId,
+                    'csrfmiddlewaretoken': csrf[0].value
+                },
+                success: function(response){
+                    console.log("successful")
+                    displayLikes = document.getElementById(`${messageId}sl`)
+                    displayLikes.innerHTML = `. ${response.message[0].likes_total} Likes`
+
+                    // changing the image on the button
+                    if (response.message[0].like_state) {
+                        likeButton.innerHTML = `<img src=${src2} height="20px" width="20px">`
+                    }
+                    else{
+                        likeButton.innerHTML = `<img src=${src1} height="20px" width="20px">`
+                    }
+
+                },
+                error: function(response){
+                    console.log("failed")
+                }
+            })
+        })
+
+    })
+}
+likeSingleMessage()
+
+
+// Takes care of followings for existing messages
+var follow_forms = [...document.getElementsByClassName("follow_form")]
+follow_forms.forEach(form =>{
+    form.addEventListener("submit", e=>{
+        e.preventDefault()
+        leader_id = e.target.getAttribute("leader_id")
+        forum_id = e.target.getAttribute("_forum_id_")
+        follow_button = document.getElementsByClassName(`${leader_id}fb`)
+        followers_count = document.getElementsByClassName(`${leader_id}nf`)
+
+        $.ajax({
+            type: 'POST',
+            data: {
+                'csrfmiddlewaretoken': csrf[0].value
+            },
+            url: `/update_followers/${leader_id}/${forum_id}/1`,
+            success: function(response){
+                console.log(leader_id)
+                // if the current user is following this leader, then say user is following (the leader)
+                if (response.leader[0].following == true ){
+                    for( i=0; i<=follow_button.length-1; i++){
+                        follow_button[i].innerHTML = "following"
+                        followers_count[i].innerHTML = `<i>(${response.leader[0].followers_total} following)</i>`
+                    }
+                }
+                 // else if the current user is not following this leader, then say give the user and option to follow (the leader)
+                else{
+                    for( i=0; i<=follow_button.length-1; i++){
+                        follow_button[i].innerHTML = "follow"
+                        followers_count[i].innerHTML = `<i>(${response.leader[0].followers_total} following)</i>`
+                    }
+
+                }
+
+
+            },
+            error : function(response){
+
+            }
+
+        })
+
+    })
+})
+
+// If the display of the comment form is none, then hide all the comments
+/*comment_form = [...document.getElementsByClassName("comment_form")]
+
+    comment_form.forEach( form=>{
+    if (form.style.display == "block") {
+        alert("yes")
+    }
+})
+*/
+
+
+// takes care of deleting a message
+delete_message = [...document.getElementsByClassName("delete_message")]
+
+delete_message.forEach( deleter => {
+    deleter.addEventListener('submit', function(e){
+        e.preventDefault()
+        d = confirm(" Delete Message?")
+        if(d){
+            postId = e.target.getAttribute("postId")
+            $.ajax({
+                type: 'POST',
+                url: `/delete_message/${postId}/`,
+                data: {
+                    'csrfmiddlewaretoken': csrf[0].value
+                },
+                success: function(response){
+                    //console.log("successful")
+                    post = document.getElementById(`conversation_${postId}`)
+                    post.remove()
+                },
+                error: function(error){
+
+                }
+           })
+        }
+
+    })
+})
+
+
+// Takes care menu for each message: handling editing, etc.
+var post_to_edit_id
+function message_menu_opener(){
+message_menu = [...document.getElementsByClassName("message_menu")]
+message_menu.forEach( menu=> {
+    menu.addEventListener('click', e=>{
+        //alert("good");
+        var parent = e.target.parentNode
+        post_to_edit_id = parent.getAttribute("postid_")
+        //alert(post_to_edit_id)
+
+        let menu_div = document.createElement("div") // div for the menu
+        let darker_for_menu = document.createElement("div") // makes background dark
+
+        let message_id = e.target.getAttribute("id")
+
+        message_id = message_id.substring(13, message_id.length) // retrieving id by removing letters
+        console.log(message_id)
+
+        container = document.getElementById(`conversation_${message_id}`)
+
+        //darker.textContent = "Whe"
+        darker_for_menu.setAttribute("class", "screen-darker")
+
+        //console.log(darker_for_menu)
+        menu_div.innerHTML =
+            `
+            <span class="edit_post"> Edit Message </span>
+            <hr>
+            <span> Report Message </span>
+            <hr>
+            <span> Others </span>
+
+            `
+        menu_div.setAttribute("class","message-pop-up")
+        menu_div.setAttribute("id", `e${post_to_edit_id}`)
+
+        darker_for_menu.setAttribute("id", "darker_for_menu")
+
+        document.body.append(menu_div)
+        document.body.append(darker_for_menu)
+
+        var messages_to_edit = [...document.getElementsByClassName('edit_post')]
+        editMessage(messages_to_edit)
+
+        document.body.setAttribute("style", "overflow:hidden;")
+
+        if (menu_div != null){
+            darker_for_menu.addEventListener('click',e =>{
+                menu_div.remove()
+                darker_for_menu.remove()
+                document.body.setAttribute("style", "overflow:scroll;")
+            })
+        }
+
+        //alert(menu_div.innerHTML)
+    })
+})
+
+}
+message_menu_opener()
+
+
+// Variables to be used while creating or editing messages
+var message_div = document.createElement("div") // new message box to be displayed
+var new_darker = document.createElement("div") // new div to darken the background
+
+
+//Takes care of message Box Div while creating or editing
+function showMessageBox(message, response=null){
+  // shows the message box (text-area)
+    message_div.innerHTML =
+    `<img id="create_or_edit_message_box_closer" src="/static/images/close.png" height="15px" width="15px" style="float: right; margin-bottom: 10px; margin-right:20px">
+        <form id="create_or_edit_message_form" method="POST"  enctype="multipart/form-data">
+            <input type="hidden" name="csrfmiddlewaretoken"  value=${csrftoken} >
+            <textarea id="create_or_edit_message_body" cols=80 rows=25 >${response ? `${response.message[0].body}` : ''}</textarea>
+            <div>
+                <input id="input_upload_image" type="file" src="/static/images/image.png" height="22px" width="22px" style="float: left; margin-bottom: 10px; margin-left:10px;">
+
+                <input id="edit_text" type="image" src="/static/images/letter-a.png" height="22px" width="22px" style="float: left; margin-bottom: 10px; margin-left:20px">
+                <label for=edit_text>
+                    <image id="upload_image" type="image" src="/static/images/image.png" height="22px" width="22px" style="float: left; margin-bottom: 10px; margin-left:10px">
+                </label>
+                <input id="upload_gif" type="image" src="/static/images/gif-file.png" height="22px" width="22px" style="float: left; margin-bottom: 10px; margin-left:10px">
+
+                <input id="submit_creation_or_edition" type="submit" ${response==null? `value="Post"`: `value="Save"`}>
+                <!--//<button id="cancel_edition">cancel</button>-->
+            </div>
+        </form>
+        `
+   message_div.setAttribute("class", "create_or_edit_message_box")
+   //message_div.style=`margin: ${screen.availWidth - 250}px;`
+
+    //alert(response)
+   if(response != null){
+       let previous_pop_up = document.getElementById(`e${post_to_edit_id}`)
+       let previous_darker = document.getElementById("darker_for_menu")
+
+       // previous darker
+       previous_pop_up.remove()
+       previous_darker.remove()
+   }
+
+   new_darker.setAttribute("class", "screen-darker")
+
+   document.body.append(message_div)
+   document.body.append(new_darker)
+
+   // if the load image button is clicked, bring a pop-menu that allows for selection of desired image
+   load_image = document.getElementById("upload_image")
+   load_image.addEventListener('click', e=>{
+        e.preventDefault()
+        loader = document.getElementById("input_upload_image")
+        loader.click()
+
+   })
+}
+
+
+// Takes care of closing the message box
+function closeMessageBox(){
+    //let message_div = document.getElementById(messageBox)
+    message_div.remove()
+    new_darker.remove()
+    document.body.setAttribute("style", "overflow:scroll;")
+
+}
+
+
+// Takes care of editing(updating) messages (it is a member of the menu)
+function editMessage(messages_to_edit){
+    messages_to_edit.forEach(edit_button=>{
+        edit_button.addEventListener('click', e=> {
+        e.target.parentNode.getAttribute
+        e.preventDefault()
+
+            $.ajax({
+                type: "GET",
+                url: `/edit_message/${post_to_edit_id}/`,
+                data: {
+
+                },
+                success: function(response){
+                   // Displaying the message box
+                   showMessageBox("create_or_edit_message_box", response)
+
+                    // submitting edited message
+
+                let form = document.getElementById("create_or_edit_message_form")
+                form.addEventListener('submit', e=>{
+                    e.preventDefault()
+                    let edited_message_ = document.getElementById("create_or_edit_message_body")
+
+                    $.ajax({
+                        type: "GET",
+                        url: `/edit_message/${post_to_edit_id}/`,
+                        data: {
+                           'body': edited_message_.value
+                        },
+                        success: function(response){
+                            //making the post reflect the change
+                             let message_new_edition = document.getElementById(`post_body_${post_to_edit_id}`)
+                             message_new_edition.innerHTML = response.message
+                             closeMessageBox()
+                             alert("Message Updated!")
+
+                             message_new_edition_div = document.getElementById(`conversation_${post_to_edit_id}`)
+
+
+                            // highlighting the edited message
+                            function highlight_edited_message(){
+                                message_new_edition_div.setAttribute("edited_message", "animate_edited_message")
+
+                                setTimeout(remove_highlight, 3005)
+
+                                function remove_highlight(){
+                                    message_new_edition_div.removeAttribute("edited_message")
+                                }
+                            }
+
+                             highlight_edited_message()
+                        },
+                        error: function(error){
+
+                        }
+
+                    })
+
+                })
+
+
+                //closing the message box
+                let closer = document.getElementById("create_or_edit_message_box_closer")
+                closer.addEventListener("click", e=>{
+                        closeMessageBox()
+                })
+
+
+
+                   // cancelling editing message
+                   /* let cancel_edition = document.getElementById("cancel_edition")
+                   cancel_edition.addEventListener('click', e=>{
+                        close_message()
+                   })*/
+                },
+                error: function(error){
+                    console.log(error)
+                }
+
+            })
+        })
+    })
+
+}
+
+
+
+
+#############################################
+correct
+#############################################
+
+// this takes care of the django csrf-token
+var like_forms
+like_forms = [...document.getElementsByClassName("like_form")]
+
+csrf = document.getElementsByName("csrfmiddlewaretoken")
+console.log('csrf', csrf)
+
+const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+// Dates are used for setting the time from django's JsonResponse to javascript
+months =["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"]
+
+//1) Takes care of creating a new message
+//{ A LISTENER IS ADDED TO FORM WITH ID="FORM" TO CREATE A NEW MESSAGE SUBMISSION USING AJAX
+// comment_no is part of the id of each form that is created by ajax
+comment_no = 1
+
+// the message form
+form = document.getElementById("form")
+
+form.addEventListener('click', e=>{
+    //displaying the message box
+    showMessageBox("create_or_edit_message_box")
+    let closer = document.getElementById("create_or_edit_message_box_closer")
+
+    // closing the message box using the close button
+    closer.addEventListener("click", e=>{
+        closeMessageBox()
+    })
+
+    var form_ = document.getElementById("create_or_edit_message_form")
+
+    form_.addEventListener('submit', e=>{
+        e.preventDefault();
+
+        forum_div = document.getElementById("current_forum")
+        forum_id = forum_div.getAttribute("forum_id")
+        console.log(forum_id)
+        //console.log("body", $('#message_box').val())
+        // Takes care of creating a new message
+
+        //let form_ = document.getElementById("create_or_edit_message_form")
+        let form = form_
+
+        $.ajax({
+            type:'POST',
+            url: "/create_new_message/",
+            data: {
+                        body: $('#create_or_edit_message_body').val(),
+                        //description: $('#description').val(),
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                        //comment: comment
+                    },
+            success: function(response){
+
+                // closing the message box when the save button is clicked
+                closeMessageBox()
+
+                message = response.message[0]
+                console.log(message.forum_id,forum_id)
+                if (message.forum_id == forum_id){
+                    displayMessageByUser(response)
+                    console.log("Cm", "successful")
+                }
+                //else if (message.author != message.user & message.forum_id == forum_id){
+                    //displayMessageByUser(response)
+                //}
+
+            },
+            error: function(error){
+                console.log(error)
+            }
+        });
+
+
+    })
+
+
+})
+
+
+
+
+// (1a) Takes care of messages posted by current user
+function displayMessageByUser(response){
+    const data = response.message
+    const emc = response.author_credential
+     //console.log (emc)
+        // emc is employment credential
+
+        data.forEach( (message) => {
+            emc.forEach( (emc)=>{
+                date = new Date(message.created)
+                mother = document.getElementById("s")
+                if(mother==null){
+                mother = document.createElement("hr")
+                mother.setAttribute("id", "s")
+                }
+
+                console.log(mother)
+                messageHtml(mother, message, emc)
+                addCommentToNewMessage(response)
+                message_menu_opener()
+            })
+        })
+
+      //addComment(response)
+      //likeUnlike(response)
+      document.getElementById("form").reset()
+      comment_no+=1
+
+}
+
+
+
+// Handles the html part of creating a new message
+function messageHtml(mother, message, emc){
+
+    mother.insertAdjacentHTML('afterbegin',
+         // NEW MESSAGE AND ITS PROPERTIES
+        `<div id="conversation_${message.post_id}" class="post" >
+             <!--// message-->
+              <div class="author_details" postid_='${message.post_id}'>
+
+                    <!--// displaying author's name -->
+                     <span><b>${message.author}</b></span>
+
+                     <!--//follow buttons -->
+                    ${message.user != message.author?
+                        `<form  id="follow" leader_id={{post.author_id}} _forum_id_={{forum.id}} class="follow_form"
+                            method="POST">
+                            <input type="hidden" name="csrfmiddlewaretoken" value=${csrftoken}>
+                            <button id="mb" class={{post.author_id}}fb type="submit" name="author_id"
+                                value="{{post.author_id}}" >
+                                   follow
+                            </button>
+                            <small class="{{post.author_id}}nf">
+                                <!-- {% for leader in leaders %}-->
+                                     <!--{% if leader.leader_id == post.author_id %} -->
+                                        <i> leader.followers_total followers </i>
+                                     <!-- {% endif %} -->
+                                 <!-- {% endfor %} -->
+                            </small>
+                        </form>` : ``
+                    }
+
+                    <!-- //delete button -->
+                     ${message.author == message.user?
+                         `<form  style="float:right; margin-left:30px;" class="delete_message" postId={{post.id}} >
+                             <input type="hidden" name="csrfmiddlewaretoken" value=${csrftoken}>
+                             <button>
+                                 <img src="/static/images/close.png"  height="12px" width="12px">
+                             </button>
+                         </form>` : ``
+                      }
+
+                     <!--// other menus like edit etc -->
+                     <img class="message_menu" id="message_menu_${message.post_id}" src="/static/images/menu(1).png" style="float:right;"  height="20px" width="20px">
+                     <br>
+
+                     <!--// author's credential -->
+                     <span id="credential">
+                        ${ emc.position?
+                             `
+                              <b> ${emc.position} at ${emc.company_organization} (${emc.start_year} ${emc.end_year !=null? `- ${emc.end_year}`:`` }) </b>
+                             `
+                             :
+
+                             ``
+                         }
+                     </span>
+
+                 <!-- // time  posted-->
+                 <small>${message.timesince}</small>
+                 <!--<small>${months[date.getMonth()]}. ${date.getDate()}, ${date.getFullYear()}</small> -->
+            </div>
+
+
+
+             <!-- //Actual Message (body)-->
+             <p id=post_body_${message.post_id}>${message.body}</p>
+
+             <!--// like button-->
+             <!-- NB: The acronyms {b: button, lb: like button, lf: like form, cf: comment form, sl: show like} -->
+             <form class="like_form"
+             forum_id='${message.forum_id}'
+             message_id='${message.post_id}'
+             src1 ="/static/images/like.png"
+             src2 ="/static/images/thumb-up.png"
+             method='POST'>
+                <input type='hidden' name='csrfmiddlewaretoken' value='${csrftoken}'>
+                <button id='${message.post_id}lb' type='submit' name='post_id' value='${message.post_id}' class='btnprimary'>
+                    <img src="/static/images/like.png"  height="20px" width="20px">
+                </button>
+                <small id="${message.post_id}sl"> . ${message.likes_total} Likes </small>
+             </form>
+
+             ${ message.user != message.author?
+                    `{# follow button #}
+                    <form action="{% url 'update_followers' post.author_id  post.forum_id  2 %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" name="author_id" value="{{post.author_id}}" class="btnprimary">
+                               follow
+                        </button>
+                    </form>` : ``
+             }
+             <!--// comment button-->
+            <div class="comment_holder_div" id='comment_holder_div_${message.post_id}'>
+                <button id="${message.post_id}b"
+                onclick="showHideForm('${message.post_id}b','${message.post_id}cf','Comment', 'comment_holder_div_${message.post_id}')"
+                src1="/static/images/speech-bubble.png" src2="/static/images/speech-bubble.png"
+                >
+                    <img src="/static/images/speech-bubble.png"  height="20px" width="20px">
+                </button>
+                <form id="${message.post_id}cf" text_area_id="${message.post_id}" style="display:none;" method="POST">
+                    <div class="comment_impute">
+                        <textarea id="${message.post_id}"></textarea>
+                        <button>
+                            <img src="/static/images/send-message.png"  height="20px" width="20px">
+                        </button>
+                     </div>
+                </form>
+                <!-- //not to be used <small id="jbc_on_${message.post_id}" >${date.getHours()}:${date.getMinutes()}
+                 ${date.getHours()>=12? "p.m.": "a.m."} </small> -->
+            </div>
+        <div>
+
+
+       `
+    )
+    like_forms = [...document.getElementsByClassName("like_form")]
+    likeSingleMessage()
+    //if (message.author_id != message.user) { updateAllLikes() }
+
+}
+
+
+// 2) This takes care of imputing and outputting comments from already existing messages to screen in Ajax format
+function addCommentToExistingMessages(){
+    var comment_forms = [...document.getElementsByClassName("comment_form")]
+    comment_forms.forEach(forms=>{
+       forms.addEventListener('submit', e=>{
+            submittedMessageId = e.target.getAttribute("text_area_id")
+            comment = document.getElementById(submittedMessageId)
+            e.preventDefault()
+            $.ajax({
+                type: 'POST',
+                url: `/comments/${submittedMessageId}/`,
+                data: {
+                    comment: comment.value,
+                    //comment_: JSON.stringify({comment: comment.value()}),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                },
+                dataType: 'json',
+                success: function(response){
+
+                     ///addComment(response)
+                    inserter= document.getElementById(`jbc_on_${response.comment[0].post_id}`)
+                    inserter.insertAdjacentHTML("afterbegin",`
+                    <div class='${submittedMessageId}cdiv comment_display'>
+                        <p><small><b>${response.comment[0].author}</small></b></p>
+                        <p>${response.comment[0].comment}</p>
+                    </div>`)
+                    console.log(response)
+                    console.log(response.comment[0].comment)
+                },
+
+                error: function(error){
+                    console.log(e.target.parentNode)
+                }
+            })
+       })
+    })
+}
+addCommentToExistingMessages()
+
+
+// 3) Add comment comments on new message
+function addCommentToNewMessage(response){
+    message = response.message[0]
+    //console.log(response)
+// Takes care of adding comments on the new message
+    form_ = document.getElementById(`${message.post_id}cf`)
+    if(form_ != null){
+    // console.log(form_)
+        form_.addEventListener('submit', e_=> {
+            e_.preventDefault()
+            submittedMessageId = `${message.post_id}`
+            //console.log(submittedMessageId)
+            comment = document.getElementById(submittedMessageId)
+
+            console.log(comment)
+
+            if (comment != null){
+            // console.log(comment.value)
+                $.ajax({
+                    type: 'POST',
+                    url: `/comments/${submittedMessageId}/`,
+                    data: {
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                        comment: comment.value,
+                        //csrfmiddlewaretoken: csrftoken,
+                    },
+                    success: function(response){
+                        console.log(response)
+                        inserter= document.getElementById(`jbc_on_${response.comment[0].post_id}`)
+                        inserter.insertAdjacentHTML("afterbegin",`
+                        <div class='${submittedMessageId}cdiv comment_display'>
+                                <p>${response.comment[0].author}</p>
+                                <p><small><i>${response.comment[0].comment}</i></small></p>
+                        </div>`)
+                        console.log(response)
+                        console.log(response.comment[0].comment)
+                        form_.reset()
+                    },
+                    error: function(error){
+                        console.log(error)
+                    }
+                })
+            }
+        })
+    }
+
+}
+
+
+// 5) Takes care of liking already existing messages NB: lbe means "like button for existing an message"
+function likeSingleMessage(){
+    like_forms.forEach(function(form){
+        form.addEventListener('submit', function(e){
+            e.preventDefault()
+
+            // attributes for message ( or post)
+            messageId = e.target.getAttribute('message_id') // this attribute belongs to the like_form
+            console.log(messageId)
+            likeButton = document.getElementById(`${messageId}lb`)
+            forumId = e.target.getAttribute("forum_id")
+
+           // attributes for image
+            let src1 = e.target.getAttribute("src1")
+            let src2 = e.target.getAttribute("src2")
+
+            $.ajax({
+                type: 'POST',
+                url: `/update_like/${messageId}/${forumId}/1`,
+                data: {
+                    post_id: messageId,
+                    'csrfmiddlewaretoken': csrf[0].value
+                },
+                success: function(response){
+                    console.log("successful")
+                    displayLikes = document.getElementById(`${messageId}sl`)
+                    displayLikes.innerHTML = `. ${response.message[0].likes_total} Likes`
+
+                    // changing the image on the button
+                    if (response.message[0].like_state) {
+                        likeButton.innerHTML = `<img src=${src2} height="20px" width="20px">`
+                    }
+                    else{
+                        likeButton.innerHTML = `<img src=${src1} height="20px" width="20px">`
+                    }
+
+                },
+                error: function(response){
+                    console.log("failed")
+                }
+            })
+        })
+
+    })
+}
+likeSingleMessage()
+
+
+// Takes care of followings for existing messages
+var follow_forms = [...document.getElementsByClassName("follow_form")]
+follow_forms.forEach(form =>{
+    form.addEventListener("submit", e=>{
+        e.preventDefault()
+        leader_id = e.target.getAttribute("leader_id")
+        forum_id = e.target.getAttribute("_forum_id_")
+        follow_button = document.getElementsByClassName(`${leader_id}fb`)
+        followers_count = document.getElementsByClassName(`${leader_id}nf`)
+
+        $.ajax({
+            type: 'POST',
+            data: {
+                'csrfmiddlewaretoken': csrf[0].value
+            },
+            url: `/update_followers/${leader_id}/${forum_id}/1`,
+            success: function(response){
+                console.log(leader_id)
+                // if the current user is following this leader, then say user is following (the leader)
+                if (response.leader[0].following == true ){
+                    for( i=0; i<=follow_button.length-1; i++){
+                        follow_button[i].innerHTML = "following"
+                        followers_count[i].innerHTML = `<i>(${response.leader[0].followers_total} following)</i>`
+                    }
+                }
+                 // else if the current user is not following this leader, then say give the user and option to follow (the leader)
+                else{
+                    for( i=0; i<=follow_button.length-1; i++){
+                        follow_button[i].innerHTML = "follow"
+                        followers_count[i].innerHTML = `<i>(${response.leader[0].followers_total} following)</i>`
+                    }
+
+                }
+
+
+            },
+            error : function(response){
+
+            }
+
+        })
+
+    })
+})
+
+// If the display of the comment form is none, then hide all the comments
+/*comment_form = [...document.getElementsByClassName("comment_form")]
+
+    comment_form.forEach( form=>{
+    if (form.style.display == "block") {
+        alert("yes")
+    }
+})
+*/
+
+
+// takes care of deleting a message
+delete_message = [...document.getElementsByClassName("delete_message")]
+
+delete_message.forEach( deleter => {
+    deleter.addEventListener('submit', function(e){
+        e.preventDefault()
+        d = confirm(" Delete Message?")
+        if(d){
+            postId = e.target.getAttribute("postId")
+            $.ajax({
+                type: 'POST',
+                url: `/delete_message/${postId}/`,
+                data: {
+                    'csrfmiddlewaretoken': csrf[0].value
+                },
+                success: function(response){
+                    //console.log("successful")
+                    post = document.getElementById(`conversation_${postId}`)
+                    post.remove()
+                },
+                error: function(error){
+
+                }
+           })
+        }
+
+    })
+})
+
+
+// Takes care menu for each message: handling editing, etc.
+var post_to_edit_id
+function message_menu_opener(){
+message_menu = [...document.getElementsByClassName("message_menu")]
+message_menu.forEach( menu=> {
+    menu.addEventListener('click', e=>{
+        //alert("good");
+        var parent = e.target.parentNode
+        post_to_edit_id = parent.getAttribute("postid_")
+        //alert(post_to_edit_id)
+
+        let menu_div = document.createElement("div") // div for the menu
+        let darker_for_menu = document.createElement("div") // makes background dark
+
+        let message_id = e.target.getAttribute("id")
+
+        message_id = message_id.substring(13, message_id.length) // retrieving id by removing letters
+        console.log(message_id)
+
+        container = document.getElementById(`conversation_${message_id}`)
+
+        //darker.textContent = "Whe"
+        darker_for_menu.setAttribute("class", "screen-darker")
+
+        //console.log(darker_for_menu)
+        menu_div.innerHTML =
+            `
+            <span class="edit_post"> Edit Message </span>
+            <hr>
+            <span> Report Message </span>
+            <hr>
+            <span> Others </span>
+
+            `
+        menu_div.setAttribute("class","message-pop-up")
+        menu_div.setAttribute("id", `e${post_to_edit_id}`)
+
+        darker_for_menu.setAttribute("id", "darker_for_menu")
+
+        document.body.append(menu_div)
+        document.body.append(darker_for_menu)
+
+        var messages_to_edit = [...document.getElementsByClassName('edit_post')]
+        editMessage(messages_to_edit)
+
+        document.body.setAttribute("style", "overflow:hidden;")
+
+        if (menu_div != null){
+            darker_for_menu.addEventListener('click',e =>{
+                menu_div.remove()
+                darker_for_menu.remove()
+                document.body.setAttribute("style", "overflow:scroll;")
+            })
+        }
+
+        //alert(menu_div.innerHTML)
+    })
+})
+
+}
+message_menu_opener()
+
+
+// Variables to be used while creating or editing messages
+var message_div = document.createElement("div") // new message box to be displayed
+var new_darker = document.createElement("div") // new div to darken the background
+
+
+//Takes care of message Box Div while creating or editing
+function showMessageBox(message, response=null){
+  // shows the message box (text-area)
+    message_div.innerHTML =
+    `<img id="create_or_edit_message_box_closer" src="/static/images/close.png" height="15px" width="15px" style="float: right; margin-bottom: 10px; margin-right:20px">
+        <form id="create_or_edit_message_form" method="POST"  enctype="multipart/form-data">
+            <input type="hidden" name="csrfmiddlewaretoken"  >
+            <textarea id="create_or_edit_message_body" cols=80 rows=25 >${response ? `${response.message[0].body}` : ''}</textarea>
+            <div>
+                <input id="input_upload_image" type="file" src="/static/images/image.png" height="22px" width="22px" style="float: left; margin-bottom: 10px; margin-left:10px;">
+
+                <input id="edit_text" type="image" src="/static/images/letter-a.png" height="22px" width="22px" style="float: left; margin-bottom: 10px; margin-left:20px">
+                <label for=edit_text>
+                    <image id="upload_image" type="image" src="/static/images/image.png" height="22px" width="22px" style="float: left; margin-bottom: 10px; margin-left:10px">
+                </label>
+                <input id="upload_gif" type="image" src="/static/images/gif-file.png" height="22px" width="22px" style="float: left; margin-bottom: 10px; margin-left:10px">
+
+                <input id="submit_creation_or_edition" type="submit" ${response==null? `value="Post"`: `value="Save"`}>
+                <!--//<button id="cancel_edition">cancel</button>-->
+            </div>
+        </form>
+        `
+   message_div.setAttribute("class", "create_or_edit_message_box")
+   //message_div.style=`margin: ${screen.availWidth - 250}px;`
+
+    //alert(response)
+   if(response != null){
+       let previous_pop_up = document.getElementById(`e${post_to_edit_id}`)
+       let previous_darker = document.getElementById("darker_for_menu")
+
+       // previous darker
+       previous_pop_up.remove()
+       previous_darker.remove()
+   }
+
+   new_darker.setAttribute("class", "screen-darker")
+
+   document.body.append(message_div)
+   document.body.append(new_darker)
+
+   // if the load image button is clicked, bring a pop-menu that allows for selection of desired image
+   load_image = document.getElementById("upload_image")
+   load_image.addEventListener('click', e=>{
+        e.preventDefault()
+        loader = document.getElementById("input_upload_image")
+        loader.click()
+
+   })
+}
+
+
+// Takes care of closing the message box
+function closeMessageBox(){
+    //let message_div = document.getElementById(messageBox)
+    message_div.remove()
+    new_darker.remove()
+    document.body.setAttribute("style", "overflow:scroll;")
+
+}
+
+
+// Takes care of editing(updating) messages (it is a member of the menu)
+function editMessage(messages_to_edit){
+    messages_to_edit.forEach(edit_button=>{
+        edit_button.addEventListener('click', e=> {
+        e.target.parentNode.getAttribute
+        e.preventDefault()
+
+            $.ajax({
+                type: "GET",
+                url: `/edit_message/${post_to_edit_id}/`,
+                data: {
+
+                },
+                success: function(response){
+                   // Displaying the message box
+                   showMessageBox("create_or_edit_message_box", response)
+
+                    // submitting edited message
+
+                let form = document.getElementById("create_or_edit_message_form")
+                form.addEventListener('submit', e=>{
+                    e.preventDefault()
+                    let edited_message_ = document.getElementById("create_or_edit_message_body")
+
+                    $.ajax({
+                        type: "GET",
+                        url: `/edit_message/${post_to_edit_id}/`,
+                        data: {
+                           'body': edited_message_.value
+                        },
+                        success: function(response){
+                            //making the post reflect the change
+                             let message_new_edition = document.getElementById(`post_body_${post_to_edit_id}`)
+                             message_new_edition.innerHTML = response.message
+                             closeMessageBox()
+                             alert("Message Updated!")
+
+                             message_new_edition_div = document.getElementById(`conversation_${post_to_edit_id}`)
+
+
+                            // highlighting the edited message
+                            function highlight_edited_message(){
+                                message_new_edition_div.setAttribute("edited_message", "animate_edited_message")
+
+                                setTimeout(remove_highlight, 3005)
+
+                                function remove_highlight(){
+                                    message_new_edition_div.removeAttribute("edited_message")
+                                }
+                            }
+
+                             highlight_edited_message()
+                        },
+                        error: function(error){
+
+                        }
+
+                    })
+
+                })
+
+
+                //closing the message box
+                let closer = document.getElementById("create_or_edit_message_box_closer")
+                closer.addEventListener("click", e=>{
+                        closeMessageBox()
+                })
+
+
+
+                   // cancelling editing message
+                   /* let cancel_edition = document.getElementById("cancel_edition")
+                   cancel_edition.addEventListener('click', e=>{
+                        close_message()
+                   })*/
+                },
+                error: function(error){
+                    console.log(error)
+                }
+
+            })
+        })
+    })
+
+}

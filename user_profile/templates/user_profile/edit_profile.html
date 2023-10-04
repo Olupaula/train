@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<style>
+    #bio_holder {
+        margin: auto;
+        margin-top: 150px;
+        width: 500px;
+        background: white;
+        text-align: center;
+        padding-top: 20px;
+        padding-bottom: 40px;
+        border: 1px solid rgb(180,180,180);
+        font-family: tahoma;
+        color: rgb(50,50,50)
+
+    }
+
+    #bio_holder input[type=text], input[type=email], textarea {
+        border: 1px solid lightblue;
+        font-family: arial;
+    }
+
+    #bio_holder input[type=text], input[type=email] {
+        width: 300px;
+        height: 18px;
+    }
+
+    #bio_holder textarea {
+        padding: 0px;
+    }
+
+    #bio_holder input[type=submit] {
+        background: blue;
+        border: 0;
+        border-radius: 20px;
+        color: white;
+        width: 70px;
+        height: 30px;
+        font-size: 14px;
+
+    }
+
+</style>
+<div id="bio_holder">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <p>{{error}}</p>
+            {% endfor %}
+            <p>{{field.label}}</p>
+            <p>{{field}}</p>
+        {% endfor %}
+        <input type="submit" value="save">
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block link %}
+    <link href="{% static 'style/blog/blog.css' %}" type="text/css" rel="stylesheet">
+{% endblock %}
+{% block body %}
+<div id="blog_title">
+        <img style="border-radius: 50%; position:absolute;
+        margin-top: -10px;" src="{{user.avatar.url}}" height="40px" width="40px">
+
+    <span style=" margin-left: 50px;">{{user}}'s {{item_type}}s</span>
+</div>
+    <div class="items" style="display: grid; grid-template-columns: 1fr 12fr;">
+        <div >
+        {% for user_ in users %}
+                {% if user_ == item.author %}
+                    {% if user_.avatar.url != "/images/view.png" %}
+                    <img style="border-radius: 50%; position:absolute; margin-top: -1px;"
+                         src="{{user_.avatar.url}}" height="35px" width="35px">
+                     {% else %}
+                        <div  style="background: grey; width: 35px; height: 35px; border-radius: 50%;display: inline-block;
+                        text-align: center; color: white; margin-top: 12px; text-transform: capitalize">
+                            <span class="blog_profile_div" style="display: block; margin-top: 9px;">
+                                {{item.author}}
+                            </span>
+                        </div>
+                    {% endif %}
+                {% endif %}
+           {% endfor %}
+        </div>
+        <div style="background: rgb(245,245,245);">
+            <span style="margin-left: 10px;" ><b>{{item.author}}</b></span>
+            <form method="POST"  class="updater_form">
+            {% csrf_token %}
+                <button>
+                    <b>Follow</b>
+                </button>
+            </form>
+
+
+            <p style="margin-left: 10px;">
+               {% if item_type == "answer" %}
+                    {{item.answer}}
+                {% elif item_type == "post" %}
+                    {{item.message}}
+                {% else %}
+                    {{item.question}}
+                {% endif %}
+            </p>
+
+            <br>
+
+            <form method="POST"  class="updater_form">
+                {% csrf_token %}
+                <button>
+                    <img src="{% static 'images/like.png' %}" height="20px" width="20px">
+                </button>
+            </form>
+
+            <form method="POST"  class="updater_form">
+                {% csrf_token %}
+                <button>
+                    <img src="{% static 'images/comment.png' %}" height="20px" width="20px">
+                </button>
+            </form>
+        </div>
+    </div>
+
+ {# load more buttons #}
+   <div id="load_more">
+       -- load more --
+   </div>
+
+   {% for item in items %}
+       <div class="items"  style="display:none;">
+           <div>
+               {% for user_ in users %}
+                    {% if user_ == item.author %}
+                        {% if user_.avatar.url != "/images/view.png" %}
+                            <img style="border-radius: 50%; position:absolute; margin-top: -1px;" src="{{user_.avatar.url}}" height="35px" width="35px">
+                        {% else %}
+                            <div style="border-radius: 50%; text-align:center; display: inline-block; background: grey;
+                             width: 35px; height: 35px; margin-top:-5px;">
+                                <span class="blog_profile_div" style="position: absolute; color: white; font-family:
+                                 arial; font-weight: bold; font-size: 20px; display: block; margin-top: 5px;
+                                 margin-left: 12px; text-transform: capitalize;">
+                                    {{item.author}}
+                                </span>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+               {% endfor %}
+           </div>
+
+           <div  style="background: rgb(245,245,245);">
+               <span style="position: absolute; margin-left: 10px; text-transform: capitalize;">
+                   <b>{{item.author}}</b>
+               </span>
+
+               <form method="POST"  class="updater_form" style="display: inline">
+                   {% csrf_token %}
+                    <button style="position: absolute; margin-left:65px;">
+                        <b>Follow</b>
+                    </button>
+               </form>
+
+                <p style="margin-top: 27px; margin-left: 10px;">
+                    {% if item_type == "answer" %}
+                        {{item.answer}}
+                    {% elif item_type == "post" %}
+                        {{item.message}}
+                    {% else %}
+                        {{item.question}}
+                    {% endif %}
+                </p>
+
+               <form method="POST"  class="updater_form">
+                    {% csrf_token %}
+                    <button>
+                        <img src="{% static 'images/like.png' %}" height="20px" width="20px">
+                    </button>
+                </form>
+
+                <form method="POST"  class="updater_form">
+                    {% csrf_token %}
+                    <button>
+                        <img src="{% static 'images/comment.png' %}" height="20px" width="20px">
+                    </button>
+                </form>
+           </div>
+
+
+    </div>
+
+    {% endfor %}
+<script src="{% static 'javascript/blog.js' %}"></script>
+{% endblock %}

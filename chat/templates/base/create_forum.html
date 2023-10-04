@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block headerlink %}
+   <link type="text/css" rel="stylesheet" href="{% static 'style/forum/join_forum.css' %}">
+{% endblock %}
+{% block link %}
+   <link type="text/css" rel="stylesheet" href="{% static 'style/forum/join_forum.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="create_room" >
+   <h3>Enter the Details of the Train You Want to Create </h3>
+   <form method="POST">
+      {% csrf_token %}
+         {% for field in form %}
+            <p> {{field.label}}</p>
+            <p>{{field}}</p>
+         {% endfor %}
+     <p><input type="submit" value="Create"></p>
+   </form>
+</div>
+
+{% endblock %}

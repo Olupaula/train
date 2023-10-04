@@ -1,0 +1,66 @@
+/* THERE IS NEED TO CREATE A MAIN.CSS THAT HAS CODES LIKE THE ONE BELOW THAT SHOULD BE USED ACROSS MULTIPLE PAGES*/
+/* pop-up box for editing messages */
+
+body{
+    margin:0;
+    background: rgb(240, 240, 240);
+}
+
+.create_or_edit_message_box {
+    background: white;
+    height: 500px;
+    weight: 500px;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 0 20px 0;
+    z-index: 3;
+    box-shadow: 2px 2px 2px rgb(90,90,90);
+    border-radius: 10px;
+    text-align: center;
+}
+
+.create_or_edit_message_box textarea{
+    border: 1px solid rgb(209,209,209);
+    font-size: 14px;
+    border-right: 0;
+    border-left: 0;
+}
+
+.create_or_edit_message_box input[type="submit"]{
+    font-family: arial, sans-serif;
+    font-size: 14px;
+    width: 70px;
+    padding:10px;
+    border: 0;
+    border-radius: 20px;
+    background: blue;
+    color:white;
+}
+
+.create_or_edit_message_box form p{
+    margin-top: 5px;
+}
+
+/* for message box */
+#create_or_edit_message_form input[type=file]:nth-child(1) {
+    /*display: none;*/
+}
+
+/* the div that makes the background dark when there is a pop-up */
+.screen-darker {
+    height: 100vw;
+    width:100%;
+    top:0;
+    position: fixed;
+    background: rgb(0,0,0,0.6);
+    z-index:1;
+
+.loading_circle {
+    padding: 10px;
+    border-radius: 50%
+    border-top: 4px solid orange;
+    border-bottom: 4px solid red;
+    background: yellow;
+}

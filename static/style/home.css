@@ -1,0 +1,59 @@
+body{
+    margin: 0;
+    background: orange;
+}
+
+#new_bees{
+    background: orange;
+    text-align: center;
+    padding-top: 50px;
+}
+
+h1 {
+    color: white;
+    text-shadow: 1px 5px 5px black;
+    font-family: verdana, sans-serif;
+}
+
+#policy{
+    color:rgb(40, 40,40);
+    font-family: verdana, sans-serif;
+}
+
+h4 {
+    font-family: georgia, sans-serif;
+    font-size: 17px;
+}
+
+#sign_up_login {
+    width: 500px;
+    margin: auto;
+    margin-top: 100px;
+}
+
+#sign_up_login a{
+    text-decoration: none;
+    color: darkblue;
+    font-weight: bold;
+    font-family: 'comic sans ms', 'bradley hand', cursive;
+    font-size: 25px;
+
+}
+
+ #login_p, #sign_up_p {
+    display: block;
+    color: pink;
+    background: lightblue;
+    border: 2px solid blue;
+}
+
+#others{
+    margin-top:100px;
+    font-family: arial, sans-serif ;
+    color: rgb(0, 60, 0);
+    height: auto;
+
+}
+
+
+

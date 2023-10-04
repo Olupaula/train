@@ -1,0 +1,161 @@
+body{
+    margin: 0;
+    background: rgb(230,230,240);
+}
+
+
+#root {
+    position: relative;
+    top: 150px;
+    margin-left: 200px;
+    font-family: arial, sans-serif;
+
+}
+
+.profile_main_details {
+    font-family: tahoma, sans-serif;
+    font-size: 14px;
+}
+
+.profile_main_details h1{
+    font-family: verdana, sans-serif;
+    font-size: 30px;
+}
+
+.profile_container {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+}
+
+.profile_side2_header {
+    border-bottom: 1px solid rgb(205,205,205);
+    font-size: 16px;
+
+}
+
+.profile_side2_header h4{
+    margin-bottom: 10px;
+    display: inline-block
+}
+
+
+.profile_side2_child {
+    margin-left: -80px;
+    margin-right:250px;
+    font-size: 15px;
+    font-family: tahoma, sans-serif;
+}
+
+.edit_button {
+    display: inline-block;
+    border-radius: 50%;
+    background: rgb(170,175,176);
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    cursor: pointer
+}
+
+.edit_button img {
+    margin-top: 5px;
+}
+
+.edit_button p{
+    margin-top: 5px;
+}
+
+.edit_profile_tab{
+    border-radius:15px;
+    width: 175px;
+    background: rgb(120,120,120);
+    text-align: center;
+    padding:5px; border: 1px solid rgb(190,190,190);
+    color: white;
+}
+
+
+
+
+.profile_container a{
+    text-decoration: none;
+    color: darkgreen;
+}
+
+.profile_container a:hover{
+    color: blue;
+}
+
+.profile_container p, h3, h4{
+    color: rgb(50,50,50)
+}
+
+#side1{
+    margin-right:200px;
+}
+
+#information_div {
+   font-size: 14px;
+   background: white;
+   padding: 10px;
+}
+
+
+#descriptor_div{
+    border-top: 1px solid rgb(200,200,200);
+    border-bottom: 1px solid rgb(200,200,200);
+    padding: 5px 0 5px 0;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+
+#variety_div {
+    font-size: 14px;
+    color: rgb(120,120,120);
+    cursor: pointer;
+}
+
+#variety_div div{
+    margin-right: 10px;
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+#profile_circle2 {
+    border-radius: 50%;
+    height: 120px;
+    width: 120px;
+    background: darkblue;
+    display: inline-block;
+    text-align: center;
+}
+
+#profile_circle2 p{
+    margin-top: 15px;
+    font-size: 75px;
+    color: white;
+}
+
+.message_body{
+    margin: 0 0 10px 0;
+    padding: 0 0 10px 0;
+    background: white;
+    color: rgb(70,70,70);
+    border-bottom: 1px solid rgb(200, 200, 200);
+    text-align: justify;
+    word-spacing: 1px;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+    font-family: tahoma, sans-serif;
+}
+
+
+#time {
+    color: rgb(120,120,120);
+    font-size: 12px;
+}
+
+#follow_div span{
+    color: rgb(120,120,120)
+}
+

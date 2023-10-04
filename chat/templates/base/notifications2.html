@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+
+
+{% block body %}
+console.log("I am alive")
+<style>
+    body{
+    margin: 0;
+    }
+
+    #notification_root {
+        position: relative;
+        top: 150px;
+        margin-left: 50px;
+    }
+</style>
+
+<div id="notification_root">
+    <a href="{% url 'to_be' %}">s</a>
+       <div id="display">
+           <p>No notifications yet</p>
+           {% for forum in forums %}
+                <p>{{forum.name}}</p>
+           {% endfor %}
+       </div>
+        <form id="post-form" method="POST">
+            {% csrf_token %}
+            <h3>Create Room</h3>
+            <p>Name</p><input type="text" name="name" id="name"/>
+            <p>Description</p><input type="text" name="description" id="description"/>
+            <input type="submit">
+        </form>
+</div>
+
+<script>
+    $(document).on('submit', '#post-form', function(e){
+        e.preventDefault();
+            $.ajax({
+                type:'POST',
+                url: "{% url 'create' %}",
+                data: {
+                    name: $('#name').val(),
+                    description: $('#description').val(),
+                    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                },
+                success: function(data){
+
+                },
+             });
+
+
+         setInterval(function(){
+            $.ajax({
+                type:'GET',
+                url: "{% url 'notifications_update' %}",
+                success: function(response){
+                    $("#display").empty();
+                        for (var keys in response.forums){
+                            var temp = "<p>" + response.forums[keys].name+"</p>";
+                                $("#display").append(temp);
+                    }
+                 },
+                error: function(response){ alert("an error occurred") }
+             });
+        } , 100);
+
+    });
+</script>
+
+
+
+{% comment %}
+<script>
+    $(document).ready(function(){
+        setInterval(function(){
+            $.ajax({
+                type:'GET',
+                url: "{% url 'notifications_update' %}",
+                success: function(response){
+                    $("#display").empty();
+                        for (var keys in response.forums){
+                            var temp = "<p>" + response.forums[keys].name+"</p>";
+                                $("#display").append(temp);
+                    }
+                 },
+                error: function(response){ alert("an error occurred") }
+             });
+        } , 1000);
+    });
+</script>
+{% endcomment %}
+
+
+{% endblock %}
+
+{% endblock %}
+
+
+
+{# NOTIFICATION A WHILE AGO #}
+
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+<style>
+    body{
+    margin: 0;
+    }
+
+    #notification_root {
+        position: relative;
+        top: 150px;
+        margin-left: 50px;
+    }
+</style>
+<div style="margin-top: 140px; margin-left: 12px;">
+
+    {% for notification in notifications %}
+        {# notifications of type answer #}
+        {% if notification.item_type == "answer" %}
+            {% for answer in answers %}
+                {% if notification.item_no == answer.id|slugify %}
+                    <a href="{% url 'blog'  notification.notifier 'answer' notification.item_no  %}">
+                        <div style="background: white; padding:10px; border: 1px solid grey; margin: auto; width: 500px; margin-bottom: 20px;">
+                            <img src='{% static "images/close.png" %}' height="12px" width="12px" style="float: right;">
+                            <span>from {{notification.notifier}}</span><span>. {{notification.created|date:"M d"}}</span> <br>
+                                {{notification.notice}}
+                        </div>
+                    </a>
+                {% endif %}
+            {% endfor %}
+
+        {# notifications of type post #}
+        {% elif notification.item_type == "post" %}
+            {% for nf_message in nf_messages %}
+                {% if notification.item_no == nf_message.id|slugify %}
+                    <a href="{% url 'blog' notification.notifier 'post' notification.item_no  %}">
+                        <div style="background: white; padding:10px; border: 1px solid grey; margin: auto; width: 500px; margin-bottom: 20px;">
+                            <img src='{% static "images/close.png" %}' height="12px" width="12px" style="float: right;">
+                            <span>from {{notification.notifier}}</span><span>. {{notification.created|date:"M d"}}</span> <br>
+                                {{notification.notice}}
+                        </div>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+        {# notifications of type question #}
+            {% for question in questions %}
+                {% if notification.item_no == question.id|slugify %}
+                    <a href="{% url 'blog' notification.notifier 'question' notification.item_no  %}">
+                        <div style="background: white; padding:10px; border: 1px solid grey; margin: auto; width: 500px; margin-bottom: 20px;">
+                            <img src='{% static "images/close.png" %}' height="12px" width="12px" style="float: right;">
+                            <span>from {{notification.notifier}}</span><span>. {{notification.created|date:"M d"}}</span> <br>
+                        {{notification.notice}}
+                        </div>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}

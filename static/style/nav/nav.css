@@ -1,0 +1,175 @@
+#header{
+    background: orange;
+    top: 0;
+    text-align: center;
+    position: fixed;
+    width: 100%;
+    z-index: 1;
+}
+
+#header h2 {
+    margin-top:0;
+    padding-top:20px;
+    padding-bottom: 20px;
+    color: white;
+    text-shadow: 1px 5px 5px black;
+    font-family: verdana, sans-serif;
+}
+
+
+.nav {
+    margin-top: -22px;
+    background: lightyellow;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    text-align:center;
+    border-bottom: 1px solid orange;
+}
+
+
+.nav span#s1, span#s2, span#s3 {
+
+    padding-right: 20px;
+
+}
+
+.nav  form {
+    display:inline;
+}
+
+.nav input[type="search"]{
+    width: 250px;
+    height: 20px;
+}
+
+.nav a:first-of-type {
+    padding-left: 20px;
+    text-decoration: none;
+}
+
+.nav a {
+    padding-right: 20px;
+}
+
+
+.logout_container {
+
+}
+
+.logout_options {
+
+}
+
+.account_menu_container {
+}
+
+.account_menu_content {
+    display: none;
+    position: absolute;
+    /*right: 220px;*/
+    left: 50%;
+    transform: translateX(50%);
+    top: 100px;
+    background: white;
+    border: 1px solid rgb(160,160,160);
+    width: 250px;
+    height: 500px;
+    font-family: arial, sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    margin:0;
+
+}
+
+/* .account_menu_container:hover .account_menu_content{
+    display: block;
+}
+*/
+
+.account_menu_container div:first-child {
+    border-bottom: 1px solid rgb(220,220,220);
+    padding: 20px;
+    font-size: 23px;
+    font-weight: bold;
+    text-transform: capitalize;
+
+}
+
+.account_menu_container div:not(:first-child){
+    padding: 10px 0 10px 0;
+    text-align: left;
+}
+
+.account_menu_container div:not(:first-child){
+    margin-left: 0;
+    text-align: left;
+
+}
+
+.account_menu_container div:nth-child(6){
+    border-bottom: 1px solid rgb(220,220,220);
+}
+
+.account_menu_content div:not(:first-child){
+    margin:0;
+    padding: 10px;
+}
+.account_menu_content div:not(:first-child):hover{
+    background: rgb(230,230,255);
+
+}
+
+/*
+I should work on this. It is affecting other things than it ought
+.account_menu_container  div:nth-child(7), div:nth-child(8), div:nth-child(9){
+   font-size: 12px;
+} */
+
+.account_menu_content a:last-of-type {
+   font-size: 12px;
+   padding-left: 0;
+   margin-left: 0;
+   text-decoration: none;
+   color: black;
+}
+
+.account_menu_content a:last-of-type .circle {
+    vertical-align:sub;
+    text-align:center;
+    color: white;
+    background: grey;
+    width: 30px;
+    padding:5px;
+    padding-top:5px;
+    margin:0;
+    height:30px;
+    border-radius: 100%;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+
+.account_menu_content  .circle {
+    margin-bottom: 120px;
+}
+
+.account_menu_content .username_div span{
+    margin: 0;
+    display: block;
+    margin-top: 10px;
+
+}
+
+#red_cap {
+    position: absolute;
+    background: red;
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    font-size: 12px;
+    color: white;
+    font-weight: bold;
+    font-family: arial;
+    margin-left: 10px;
+}
+

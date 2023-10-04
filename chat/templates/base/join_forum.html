@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block link %}
+    <link type="text/css" rel="stylesheet" href="{% static 'style/forum/join_forum.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div></div>
+
+    <div class="info">
+        {% for forum in forums %}
+        <div class="forum_">
+            <a href="{% url 'forum' forum.id %}">{{forum.name}}
+                <div class="description">{{forum.description}}</div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div></div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block link %}
+    <link type="text/css" rel="stylesheet" href="{% static 'style/answer.css' %}">
+{% endblock %}
+{% block body %}
+    <div class="answers_container">
+    {% for question in questions %}
+        <div class="answer_div">
+            <img id="closer"  style="float: right;" src="/static/images/close.png" height="12px" width="12px" >
+            <p>{{question}}</p>
+
+            {% for answer in answers %}
+                {% if answer.question_id == question.id %}
+                    <p >{{answer.question_id|length}}</p>
+                {% endif %}
+            {% endfor %}
+
+            <span id={{question.id}} class="answers">Answer</span>
+            <span>Follow</span>
+            <span>Pass</span>
+            <img style="float: right" src="{% static 'images/menu(1).png' %}" height="22px" width="22px">
+        </div>
+    {% endfor %}
+    </div>
+    <script type="module" src="{% static 'javascript/answers.js' %}"> </script>
+{% endblock %}
+

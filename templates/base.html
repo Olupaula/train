@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    {% block head %}
+        <meta charset="UTF-8">
+        <title>Test My Chat</title>
+        {% block headerlink %} {% endblock %}
+        {% block link %} {% endblock %}
+        <script src="{% static 'javascript/jquery-3.6.0.min.js' %}"></script>
+        <link type="text/css" rel="stylesheet" href="{% static 'style/main.css' %}">
+    {% endblock %}
+</head>
+
+<body>
+
+{% include 'navbar.html' %}
+
+{% comment %}
+<p class="thing" style="display:none;"> I get this dsd </p>
+<button class = "getter">Getter</button>
+<p id="yes"></p>
+<script>
+    $(document).ready(function(){
+        $(".getter").click(function(){
+            $('.thing').css('display', 'block');
+            $("#yes").text("I get");
+        });
+    });
+{% endcomment %}
+
+{% comment %}
+    $.ajax({
+        type: "GET",
+        url: '{% url 'notification2' %}',
+        success: function(response){
+            console.log(response)
+            const forums = response.forums
+            console.log(forums)
+        },
+        error: function(error){
+            console.log(error)
+        }
+
+    });
+    {% endcomment %}
+
+</script>
+
+{% block body %}
+{% endblock %}
+
+<script type="module" src="{% static 'javascript/main.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+.answer_div {
+    width: 500px;
+    margin: auto;
+    background: white;
+    margin-bottom: 20px;
+    border: 1px solid grey;
+    padding: 15px 10px 10px 10px;
+}
+
+.answer_div .answers {
+    color: blue;
+    cursor: pointer;
+
+}
+
+.answers_container {
+    z-index: 11;
+    margin-top: 200px;
+}
+
+.answer_div span{
+    padding-right: 20px;
+}

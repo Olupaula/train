@@ -1,0 +1,349 @@
+body {
+    background: rgb(245,245,245) ;
+    text-align: left;
+    margin:0;
+    z-index:-1;
+}
+
+h1 {
+    color: yellow;
+}
+
+.forum_description {
+    background: black;
+    color: white;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    font-family: helvetica, sans-serif;
+    padding-left: 20px;
+    position: relative;
+    z-index: 0;
+    top: 105px;
+}
+
+.section {
+    display: grid;
+    grid-template-columns: 1.5fr 2.4fr 1.5fr;
+    position: relative;
+    top: 150px;
+    z-index: 0;
+}
+
+#post_holder form {
+    padding-bottom:50px;
+    display:inline;
+    z-index: 0;
+    position: relative;
+}
+
+.nav{
+
+
+}
+
+
+.post {
+    background: white;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-down: 10px;
+    margin-top:5px;
+    font-family: helvetica, sans-serif;
+    font-size: 15px;
+    border: 1px solid rgb(209,209,209);
+
+}
+
+.post button{
+    background: transparent;
+    border: none;
+}
+
+.post form#follow button:first-of-type{
+    color: darkblue;
+    font-weight: bold;
+}
+
+.post .author_details {
+    font-size: 14px;
+}
+
+.post .author_details #credential {
+      color: rgb(110,110,110);
+}
+
+.post .author_details span, button {
+    text-transform: capitalize;
+}
+
+.post .message_body, div{
+    line-height: 1.5;
+    word-spacing: 1px;
+    font-family: arial, sans-serif;
+    color: rgb(15,15,15);
+}
+
+.post .message_body, img{
+
+}
+
+.post .message_body, div{
+    padding-top: 10px;
+    font-family: arial, sans-serif;
+}
+
+.post .message_uploaded_images {
+    margin: auto;
+    display: block;
+    margin-top: -30px;
+    margin-bottom: -20px;
+}
+
+#form #submit_new_message {
+    background: transparent;
+    border: none;
+}
+
+#create_button {
+    background: transparent;
+    border: none;
+}
+
+#message_impute_div {
+    background: rgb(230,230,230);
+    height: 100px;
+    border-radius: 10px;
+    margin-top: 20px;
+    border: 1px solid rgb(191,191,191);
+    width: 100%;
+}
+
+#message_impute_div form{
+    margin-left: 50px;
+
+}
+
+#message_impute_div textarea {
+    border: 1px solid rgb(191,191,191);
+    width: 65%;
+}
+
+
+.comment_holder_div  {
+    display: inline;
+}
+
+.comment_holder_div form textarea{
+    border: 1px solid rgb(191,191,191);
+    border-radius: 10px;
+    width: 65%;
+    margin: 0 0 0 10px;
+
+}
+
+.comment_impute {
+    background: rgb(240,240,240);
+    padding: 10px 0 10px 0;
+    border-radius: 10px;
+    border: 1px solid rgb(221,221,221);
+    width: 90%;
+    margin: 20px auto 10px auto;
+}
+
+/* this class handles how the comment is displayed */
+.comment_display {
+    background: rgb(252,250,250);
+    border:1px solid rgb(239,239,239);
+    padding: 0px 10px 10px 10px;
+    margin-bottom: 10px;
+    font-style: italic;
+    font-size: 14px;
+}
+
+
+/* for message pop-up */
+.message-pop-up {
+    position: fixed;
+    top:50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background: white;
+    box-shadow: 4px 4px 2px rgb(105,105,105);
+    border: 2px solid rgba(105,105,105,0.5);
+    color: darkblue;
+    padding: 20px 20px 20px 20px;
+    height:300px;
+    width:150px;
+    z-index: 2;
+    font-family: arial, sans-serif;
+    font-size: 14px;
+    border-radius:5px;
+}
+
+/* pop-up for options on each message (post) */
+.message-pop-up span {
+    display: block;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+
+.screen-darker {
+    height: 100vw;
+    width:100%;
+    top:0;
+    position: fixed;
+    background: rgb(0,0,0,0.8);
+    z-index:1;
+}
+
+/* pop-up box for editing messages */
+.create_or_edit_message_box {
+    background: white;
+    height: 520px;
+    weight: 500px;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 0 20px 0;
+    z-index: 3;
+    box-shadow: 2px 2px 2px rgb(90,90,90);
+    border-radius: 10px;
+    text-align: center;
+
+}
+
+.create_or_edit_message_box textarea{
+    border: 1px solid rgb(209,209,209);
+    font-size: 14px;
+    border-right: 0;
+    border-left: 0;
+}
+
+.create_or_edit_message_box input[type="submit"]{
+    font-family: arial, sans-serif;
+    font-size: 14px;
+    width: 70px;
+    padding:10px;
+    border: 0;
+    border-radius: 20px;
+    background: blue;
+    color:white;
+}
+
+.create_or_edit_message_box form p{
+    margin-top: 5px;
+}
+
+
+/* for message box */
+#create_or_edit_message_form input[type=file]:nth-child(1) {
+    /*display: none;*/
+}
+
+/* I am not sure if it is good practice to keep  messages to be uploaded at the center of the div
+
+.create_or_edit_message_box img{
+    text-align: center;
+    margin: auto;
+    display: block;
+}
+*/
+
+#message_body_representative {
+    text-align: left;
+    font-size: 14px;
+    font-family: arial, sans-serif;
+    z-index: 1.5;
+    overflow: auto;
+}
+
+#message_body_representative div {
+    padding-top: 20px;
+}
+
+div[edited_message="animate_edited_message"]{
+    border: 1px solid lightgreen;
+    animation-name: bluer;
+    animation-duration: 3s;
+}
+
+@keyframes bluer {
+    0% {background: rgb(220, 255, 225); }
+    50% {background: rgb(245, 255, 245); }
+    100% {background: rgb(239, 255, 239); }
+}
+
+.side_3_child {
+    margin-left: 50px;
+    font-family: arial, sans-serif;
+    font-size: 14px;
+    border: 1px solid rgb(191,191,191);;
+    width: 60%;
+    background: white;
+}
+
+/* for headers of side3 */
+.side3_header {
+    /*background: rgb(230,230,255);*/
+    border-bottom: 1px solid rgb(191,191,191);
+    color: black;
+    font-weight: bold;
+    padding: 20px;
+    text-align: center;
+    margin-top:-0.05px;
+    padding:5px;
+}
+
+.side_3_child span {
+    display: block;
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+.side_3_child span:first-of-type {
+    margin-top: 20px;
+}
+
+#side_3 div{
+    margin-bottom: 20px;
+}
+
+/* admin dash board */
+#admin_dash_board {
+    background: white;
+    border: 1px solid rgb(191,191,191);
+    height: 350px;
+    font-family: arial, sans-serif;
+    font-size: 15px;
+    padding: 10px;
+}
+
+#admin_dash_board span{
+    margin-right: 20px;
+}
+
+#admin_dash_board h3{
+    text-align: center;
+    font-size: 18px;
+}
+
+#admin_dash_board hr {
+    border: 1px solid rgb(209,209,209);
+}
+
+#edit_tools{
+    display: inline-block;
+    float:left;
+    margin-left: 10px;
+}
+
+#edit_tools button{
+    margin-left: 5px;
+}
+
+#editing_tools_holder{
+    margin-top: -30px;
+}

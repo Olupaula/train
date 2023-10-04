@@ -1,0 +1,7 @@
+{% if registration == "succeeded" %}
+  <h3>Your email address has been verified.</h3>
+  <p>You can now <a href="{% url 'login' %}" >login</a></p>
+{% elif registration == 'failed' %}
+  <h3>Your email address has not been verified.</h3>
+  <p>You can now <a href="" >An error occurred</a></p>
+{% endif %}

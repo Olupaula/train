@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{%  load static %}
+
+
+{% block body %}
+{# Welcome message, host and number of followers #}
+    <h3>Welcome, <b style="text-transform:uppercase; color:green;">{{user}}</b>, to {{forum}} forum
+    </h3>
+   <small><b>{{forum.description}}</b></small></br>
+
+
+    {% if forum.host == user %}
+    {# if the host is the current user #}
+     <small>
+            Host: You
+            {% for leader in leaders %}
+                {% if forum.host == leader.leader %}
+                        {% if leader.number_of_followers is not None %}
+                            <i> ( You have {{leader.number_of_followers}} followers ) </i>
+                        {% else %}
+                            <i>( with no followers )</i>
+                        {% endif %}
+        </small></br>
+                {% endif %}
+            {% endfor %}
+    {% else %}
+    {# if the host is not the current user #}
+        <small>
+            Host: {{forum.host}}
+            {% for leader in leaders %}
+                {% if forum.host == leader.leader %}
+                        {% if leader.number_of_followers is not None %}
+                            <i> ( With {{leader.number_of_followers}} followers ) </i>
+                        {% else %}
+                            <i>( with no followers )</i>
+                        {% endif %}
+        </small></br>
+                {% endif %}
+            {% endfor %}
+    {% endif %}
+
+    <small>{{forum.number_of_participants}} Participants in Forum</small><br/>
+
+
+{# To write new message #}
+    <p><button id="create_button" onclick="showHideForm('create_button', 'form', 'Message')">Cancel Message</button ></p>
+    <form method = "POST" id="form" style="width:500px, height:100px; background:red; padding-bottom:50px;">
+        <p>What's on your mind?</p>
+        {% csrf_token %}
+           {% for message in messages %}
+                <p>{{message}}</p>
+           {% endfor %}
+        {% for field in form %}
+            {{ field }}
+        {% endfor %}
+        <p><input type="submit"></p>
+    </form>
+
+
+
+{# The conversations, signatures, time and likes, follow buttons, and comment forms #}
+<div>
+    <h4 id="conversation_head">Conversations</h4>
+    {% for post in posts %}
+        <hr>
+        <hr id="s">
+    {# Posts (Messages) and  their signatures #}
+    <div id="conversation_{{post.id}}" style="background:orange;">
+            <small>{{post.created|date}}</small>
+            <p>{{post}}</p>
+            <small> {{post.author}}</small>
+        {% if user != post.author %}
+            {# like button #}
+            <form action="{% url 'update_like' post.id post.forum_id 2 %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" name="post_id" value="{{post.id}}" class="btnprimary">
+                        Like
+                </button>
+                <small> . {{post.likes_total}} Likes</small>
+
+            {# follow button #}
+            </form>
+            <form action="{% url 'update_followers' post.author_id  post.forum_id  2 %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" name="author_id" value="{{post.author_id}}" class="btnprimary">
+                       follow
+                </button>
+            </form>
+        {% endif %}
+
+            {# comment button #}
+            <button id={{post.id}}b onclick="showHideForm('{{post.id}}b', '{{post.id}}f', 'Comment')">comment</button>
+            <form id={{post.id}}f class="comment_form" text_area_id={{post.id}} style="display:none"  method="POST">
+                {% csrf_token %}
+                <textarea id={{post.id}}></textarea>
+                <small> <input type="submit"></small>
+            </form>
+            {# jbc means just before comment #}
+            <small id=jbc_on_{{post.id}}>{{post.created|time}}</small>
+
+            {# comments #}
+            <div class="class_comment">
+                    {% for comment in comments %}
+                        {% if comment.message_id == post.id %}
+                        <div class="_comment" style="background:yellow; margin-left:20px;" >
+                            <p><small>{{comment.commenter}}</small></p>
+                            <p>{{comment.comment}}</p>
+                        </div>
+
+                        {% endif %}
+                    {% endfor %}
+            </div>
+    {% endfor %}
+    </div>
+<hr>
+<hr>
+
+</div>
+
+{% comment %}
+
+{% endcomment %}
+<script src="{% static 'javascript/d.js' %}"></script>
+{% endblock %}

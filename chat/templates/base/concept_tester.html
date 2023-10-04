@@ -1,0 +1,103 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        #id_images {
+            display: none;
+            poin
+        }
+    </style>
+</head>
+<body>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+        <p>{{field.label}}</p>
+        <p>{{field}}</p>
+    {% endfor %}
+    <label for="id_images">
+     <img src="/static/images/view.png" height="20px" weight="20px;">
+    </label><br>
+    <input type="submit">
+</form>
+
+<div>
+    {% for message in messages %}
+        <div style="border:1px solid black; background:lightblue;">
+            <p>{{message.body}}</p>
+            {% for image in images %}
+                {% if image.message_id == message.id %}
+                <img src="{{image.image.url}}" height="30px" width="40px">
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+</body>
+</html>
+
+-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+</head>
+<body>
+
+<form id="form">
+	<input id="files" type="file" accept="images/*" multiple>
+	<input  id="result" type="button" value="result">
+</form>
+
+<script>
+	files = document.getElementById("files")
+	file_name = files.value.substring(12,files.value.length)
+
+
+	file_list = []
+
+	files.onclick = function(){
+		create_file = new File(["image"], file_name, {type: "image"})
+		file_list.push(create_file)
+	}
+
+	result = document.getElementById("result")
+	new_files_.pust(files.files[0])
+	result.onclick= function(){
+		alert(file_list)
+		for(i=0; i<=file_list.length; i++){
+			url =URL.createObjectURL(file_list[i])
+			image = document.createElement("img")
+			image.setAttribute("src",`${url}`)
+			image.setAttribute("height","70%")
+			image.setAttribute("width","350px")
+			document.body.append(image)
+		}
+
+	}
+
+	/* result.onclick= function(){
+			alert(file_list)
+		for(i=0; i<=files.files.length-1; i++){
+				url =URL.createObjectURL(files.files[i])
+				image = document.createElement("img")
+				image.setAttribute("src",`${url}`)
+				image.setAttribute("height","70%")
+				image.setAttribute("width","350px")
+				document.body.append(image)
+
+
+		}
+	} */
+</script>
+
+</body>
+</html>

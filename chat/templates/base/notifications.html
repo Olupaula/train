@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block link %}
+    <link type="text/css" rel="stylesheet" href="{% static 'style/notification/notification.css' %}">
+{% endblock %}
+{% block body %}
+<style>
+    body{
+    margin: 0;
+    }
+
+    #notification_root {
+        position: relative;
+        top: 150px;
+        margin-left: 50px;
+    }
+
+
+    .profile_image {
+        border-radius: 50%;
+        display: inline;
+    }
+
+</style>
+<div style="margin-top: 140px; margin-left: 12px;">
+
+    {% for notification in notifications %}
+        {% for leader in leaders %}
+                {{leader}}
+
+                {{notification.notifyee}}
+                  <!--   {{leader.followers}}
+                {{user}} -->
+
+        {% endfor %}
+        {# notifications of type answer #}
+                        <div class="notification_div" style="background: white;  border: 1px solid grey; margin: auto; width: 500px; margin-bottom: 20px; position: relative;">
+                            <a href="{% url 'blog'  notification.notifier notification.item_type notification.item_no  %}">
+
+                                <div style="margin:0; padding:10px;">
+                                    {% for user_ in users %}
+                                        {% if notification.notifier == user_ %}
+                                            {% if user_.avatar.url != "/images/view.png" %}
+                                                <img class="profile_image" src="{{user_.avatar.url}}"
+                                                     height="35px" width="35px">
+                                            {% else %}
+                                                <div  style="background: grey;
+                                                 width: 35px; height: 35px; border-radius: 50%;
+                                                 display: inline-block; text-align: center; color: white;
+                                                  margin-top: 12px; text-transform: capitalize">
+                                                    <span class="notification_profile_div" style="display: block; margin-top: 9px;">
+                                                        {{notification.notifier}}
+                                                    </span>
+                                                </div>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    <img src='{% static "images/menu(1).png" %}' height="20px" width="20px" style="float: right;">
+                                    <span class="from_person">
+                                        New from <span class="name">{{notification.notifier}}</span>. {{notification.created|timesince}}
+                                    </span> <br>
+                                    <div class="item">
+                                        {{notification.notice}}
+                                    </div>
+
+                                    <span class="information">
+                                        {% if notification.item_type == "answer" %}
+                                            <span class="name">{{notification.notifier}}</span> answered a question
+                                        {% elif notification.item_type == "post" %}
+                                            <span class="name">{{notification.notifier}}</span> added a new post
+                                        {% else %}
+                                            <span class="name">{{notification.notifier}}</span> asked a question
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </a>
+                        </div>
+    {% endfor %}
+</div>
+<script src="{% static 'javascript/notifications.js' %}"></script>
+{% endblock %}

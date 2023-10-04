@@ -1,0 +1,37 @@
+a {
+    font-family: arial;
+    text-decoration: none;
+    color: black;
+    z-index: 4;
+    display: absolute;
+}
+
+a .item {
+     font-weight: bold;
+     margin-left: 53px;
+     width: 400px;
+     white-space: nowrap;
+     overflow: hidden;
+     text-overflow: ellipsis;
+}
+
+.information {
+    color: black;
+    font-size: 14px;
+    padding: 10px 0 0 0;
+    display: block;
+    margin-left: 50px;
+}
+
+.from_person {
+    color: rgb(90,90,90);
+    font-size: 14px;
+    padding: 0 0 0 0;
+    position: absolute;
+    margin-top: 12px;
+    margin-left: 15px;
+}
+
+.name {
+    text-transform: capitalize;
+}

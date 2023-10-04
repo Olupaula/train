@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block body %}
+
+
+<div id="spinner-box" class="text-center">
+    <div class="spinner-border" role="status"></div>
+</div>
+
+<div id="posts-box"></div>
+<div id="hello-word"></div>
+
+
+<div id="postBox">
+
+</div>
+
+<div>
+    <button id="loadBtn"> Load More</button>
+</div>
+
+
+
+{# these parts have been removed by me #}
+{% comment %}
+<p id="yes"></p>
+<p id="yes2"></p>
+<div class="another" id="yes3">
+    <button class="a" id="aid">Load More</button>
+</div>
+{% endcomment %}
+
+{% comment %}
+    <form action="{% url 'to_be'  %}" method = "POST" class="we" >
+    {% csrf_token %}
+    {% if like == True %}
+        <button class="a"  name="like_id" value="like"  >like</button>
+    {% else %}
+        <button class="a" name="unlike_id" value="unlike" >Unlike</button>
+    {% endif %}
+   </form>
+{% endcomment %}
+<small id="endbox">
+
+</small>
+
+<script>
+
+  {% comment %}
+    let visible = 3
+    const loadBtn = document.getElementById("aid")
+
+    const getData = () => {
+        $.ajax({
+            'type': 'GET',
+            'url': `/notification2/${visible}` ,
+            success: function(response){
+               // 1)vWhen using serializers
+               /* const data = JSON.parse(response.forums)
+               console.log(data) */
+
+               // 2) When using the List kind
+               /* e = document.getElementById("yes")
+               e.innerHTML = response.forums
+               $("#yes2").text(response) */
+
+               console.log(response)
+               const messages = response.messages
+               console.log(messages)
+
+               e = document.getElementById("yes")
+
+               messages.forEach(el => {
+
+                    e.innerHTML += `<small>${el.id}</small> - <b>${el.message}</b> - </br>`
+
+               });
+
+            },
+
+            error: function(response){
+
+            }
+        })
+
+    }
+
+    loadBtn.addEventListener('click', ()=>{
+        visible += 3
+        getData()
+    })
+
+    getData()
+
+
+
+    $.ajax({
+        type: "GET",
+        url: '{% url 'notifications' %}',
+        success: function(response){
+            console.log(response)
+            const forums = response.forums
+            console.log(forums)
+        },
+        error: function(error){
+            console.log(error)
+        }
+
+    });
+{% endcomment %}
+</script>
+{% endblock %}

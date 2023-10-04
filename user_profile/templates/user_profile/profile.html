@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+
+{% block link %}
+    <link type="text/css" rel="stylesheet" href="{% static 'style/profile/profile.css' %}">
+{% endblock %}
+
+
+    <div id="root" class="profile_container" >
+        <div id="side1">
+            <div class="profile_main_details">
+                {% if user.avatar.url != '/images/view.png'  %}
+                    <div style="display: inline-block; margin-right: 20px;">
+                        <img src="{{user.avatar.url}}" height="125px" width="125px" style="border-radius: 50%; ">
+                    </div>
+                {% else %}
+                     <div id="profile_circle2" style="margin-right: 20px">
+                        <p id="profile_profile_div">{{user}}</p>
+                    </div>
+                    {% comment %}
+                        <img src="{% static 'images/user (1).png' %}" height="125px" width="125px" style="border-radius: 50%; ">
+                    {% endcomment %}
+                {% endif %}
+                <h1 style="display: inline; position: absolute; top: 30px; margin-top: 10px;">{{request.user}}</h1>
+                <p>{{request.user.email}}</p>
+
+                <div id="follow_div">
+                    <span>{{followers_total}} followers</span>
+                    <span>. {{followings_total}} following</span>
+                </div>
+
+                <div class="edit_profile" >
+                    <p class="edit_profile_tab">
+                        <img src="{% static 'images/edit (1).png' %}" height="15px" width="15px" >
+                        <a href="{% url 'edit_profile' user.id %}" style="color: white;"> Edit profile</a>
+                    </p>
+                    <p>Describe yourself</p>
+                </div>
+            </div>
+
+            <div id="variety_div">
+                <div id="profile_detail" class="informant" emc={{emc}} edc={{edc}} loc="{{loc}}"
+                     style="color: brown; border-bottom: 2px solid red;">Profile</div>
+                <div id="display_answers" class="informant">Answer</div>
+                <div id="display_questions" class="informant" >Questions</div>
+                <div id="user_posts" username="{{user}}" class="informant" >Posts</div>
+                <div id="display_followings" class="informant" >{{user.following_total}} following </div>
+                <div id="display_followers" class="informant" >{{user.followers_total}} followers </div>
+            </div>
+
+            <div id="descriptor_div">
+                Profile
+            </div>
+            <div id="information_div">
+                {% if emc and edc and loc %}
+                    <p style="color: rgb(120,140,120);">profile Credentials Complete </p>
+                {% elif emc != True or edc != True or loc != True %}
+                    <p style="color: rgb(120,120,140);"> You need to update your profile.</p>
+                {% else %}
+                    <p style="color: red;"> No Profile Credentials </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="side2">
+
+            <div class="profile_side2_child">
+                <div class="profile_side2_header">
+                    <h4>Credentials and Highlights</h4>
+                    {# this should show for only the owner of this profile #}
+                    <div class="edit_button">
+                        <img src="{% static 'images/edit (1).png' %}" height="15px" width="15px" >
+                    </div>
+                </div>
+               {# creating and ending employment credentials (emc) #}
+                <p>
+                     {% if emc %}
+                        <span>
+                            <img src="{% static 'images/briefcase.png' %}" height="15px" width="15px" >
+                            {{emc.position}} at {{emc.company_organization}}
+                        </span>
+                        <a href="{% url 'update_employment_credential' %}">
+                            <img src="{% static 'images/edit (1).png' %}" height="15px" width="15px" >
+                        </a>
+                        <span onclick="deleteCredentialForm('delete_employment_credential')">
+                            <img src="{% static 'images/delete.png' %}" height="20px" width="20px" ></span>
+                        <form id="delete_employment_credential" action="{% url 'delete_employment_credential' %}" style="display:none;" method="POST">
+                            {% csrf_token %}
+                            Are you sure you want delete credential?
+                            <div onclick="deleteCredentialForm('delete_employment_credential')">No</div>
+                            <input type="submit" value="Yes">
+                        </form>
+                     {% else %}
+                        <a href="{% url 'employment_credential' %}">
+                            <img src="{% static 'images/briefcase.png' %}" height="15px" width="15px" >
+                            Add Employment Credential
+                        </a>
+                     {% endif %}
+                </p>
+
+               {# creating and updating education credentials (edc) #}
+                <p>
+                    {% if edc %}
+                     <span>
+                         <img src="{% static 'images/graduate-cap.png' %}" height="15px" width="15px" >
+                         {{edc.degree_type}} in {{edc.primary_major}}  {% if edc.secondary_major %} and
+                         {{edc.secondary_major}} {% endif %} at {{edc.school}}
+                     </span>
+                    <a href="{% url 'update_education_credential' %}">
+                         <img src="{% static 'images/edit (1).png' %}" height="15px" width="15px" >
+                    </a>
+                    <span onclick="deleteCredentialForm('delete_education_credential')">
+                         <img src="{% static 'images/delete.png' %}" height="20px" width="20px" >
+                    </span>
+                    <form id="delete_education_credential" action="{% url 'delete_education_credential' %}" style="display:none;" method="POST">
+                        {% csrf_token %}
+                        Are you sure you want delete credential?
+                        <div onclick="deleteCredentialForm('delete_education_credential')">No</div>
+                        <input type="submit" value="Yes">
+                    </form>
+                    {% else %}
+                    <a href="{% url 'education_credential' %}">
+                        <img src="{% static 'images/graduate-cap.png' %}" height="15px" width="15px" >
+                        Add Education Credential
+                    </a>
+                    {% endif %}
+                </p>
+
+               {# creating and updating location credentials (loc) #}
+                <p>
+                    {% if loc %}
+                    <a>
+                         {% if loc.start_year != loc.end_year %}
+                            <img href="{% static 'images/placeholder.png' %}" height="20px" width="20px" >
+                            Lived at {{loc.location}} from {{loc.start_year|date:"Y"}} to {{loc.end_year|date:"Y"}}
+                         {% else %}
+                            <img src="{% static 'images/placeholder.png' %}" height="20px" width="20px" >
+                             Lived at {{loc.location}} in {{loc.start_year|date:"Y"}}
+                         {% endif %}
+                    </a>
+
+
+                    <a href="{% url 'update_location_credential' %}"> update </a>
+                    <span onclick="deleteCredentialForm('delete_location_credential')"> delete </span>
+                    <form id="delete_location_credential" action="{% url 'delete_location_credential' %}" style="display:none;" method="POST">
+                        {% csrf_token %}
+                        Are you sure you want delete credential?
+                        <div onclick="deleteCredentialForm('delete_education_credential')">No</div>
+                        <input type="submit" value="Yes">
+                    </form>
+
+                    {% else %}
+
+                    <a href="{% url 'location_credential' %}">
+                        <img src="{% static 'images/placeholder.png' %}" height="15px" width="15px" >
+                        Add Location Credential
+                    </a>
+                </p>
+                    {% endif %}
+                </p>
+
+                <p>
+                    <img src="{% static 'images/eye.png' %}" height="15px" width="15px" >
+                    content views this month
+                </p>
+                <p>Active in {{user_number_of_forums}} forums</p>
+                <p>joined on {{user.date_joined|date}}</p>
+                <p>Number of space created {{forums_hosted_by_user|length}}</p>
+           </div>
+
+           <div class="profile_side2_child">
+                <div class="profile_side2_header">
+                    <h4>Spaces</h4>
+                    {# this should show for only the owner of this profile #}
+                    <div class="edit_button">
+                       <p>+</p>
+                    </div>
+                </div>
+               {% for forum in forums %}
+                    {% if user == forum.host %}
+                        <p><b>{{forum.name}}</b></p>
+                        <p>Your Status: Admin </p>
+                        <p> Number of participants {{forum.participants_total}}</p>
+                       {% comment %} <p>{% for user_post in user_posts %}
+                                {% if user_post.forum_id == forum.id %}
+                                    Number of {{user_post.messages_total}}
+                                {% endif %}
+                            {% endfor %}
+                        {% endcomment %}
+                        </p>
+                    {% else %}
+                          <p><b>{{forum.name}}</b></p>
+                        <p>Your Status: Member </p>
+                        <p> Number of participants {{forum.participants_total}}</p>
+                    {% endif %}
+
+               {% endfor %}
+           </div>
+      </div>
+   </div>
+
+<script src="{% static 'javascript/profile.js' %}"></script>
+
+{% endblock %}

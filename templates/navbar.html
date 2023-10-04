@@ -1,0 +1,87 @@
+{% if user.is_authenticated %}
+{% load static %}
+{% block headerlink %}
+   <link type="text/css" rel="stylesheet" href="{% static 'style/nav/nav.css' %}">
+{% endblock %}
+<div id="header">
+
+   <h2>D-Train {{d}} </h2>
+   {# comment <img src="" height="50px" width="50px"> #}
+
+   <div class="nav" >
+      <span id="s1">
+          <a href="/" ><img id="home_page" src="{% static 'images/home.png' %}" height="27px" width="27px"></a>
+      </span>
+      <span id="s2">
+          <a href = "{% url 'group_chat' %}"><img src="{% static 'images/group(2).png' %}" height="27px" width="27px"></a>
+      </span>
+      <span id="s3">
+          <a id="notification_link" href="{% url 'notifications' %}">
+              {# {% if unread_notifications < 0 %} #}
+                    <span id="red_cap" style="display: none;" >{{unread_notifications}}</span>
+              {# {% endif %} #}
+              <img id="notification_image" src="{% static 'images/bell (2).png' %}" height="20px" width="20px">
+          </a>
+      </span>
+      <span>
+          <form>
+              <input type="search">
+          </form>
+      </span>
+
+       <span class="account_menu_container">
+            {% if user.avatar.url != '/images/view.png' %}
+                <img id="login_button" src="{{user.avatar.url}}" height="30px" width="30px" style="border-radius: 50%;" >
+            {% else %}
+                <img  id="login_button" src="{% static 'images/user (1).png' %}" height="22px" width="22px" >
+            {% endif %}
+
+          <div class="account_menu_content" style="display: none">
+                <a href="{% url 'profile' %}">
+                    <div class="username_div">
+                        {% if user.avatar.url != '/images/view.png' %}
+                            <div style="text-align: center; border-radius: 50%; border-bottom: 1px solid rgb(230,230,230);">
+                                  <img  style="border-radius: 50%;" src="{{user.avatar.url}}" height="70px" width="70px">
+                            </div>
+                        {% else %}
+                             <div style="text-align: center; border-radius: 50%; border-bottom: 1px solid rgb(230,230,230);">
+                                <img style="display: block; margin: auto;"src="{% static 'images/user (1).png' %}" height="75px" width="75px">
+                             </div>
+                        {% endif %}
+
+                        <span style="display: block; text-align: center;">{{user.username}}</span>
+                    </div>
+                </a>
+                <div>Messages </div>
+                <div>Your content & stats </div>
+                <div>Bookmarks</div>
+                <div>Drafts</div>
+                <div>Dark mode</div>
+                <div>Settings</div>
+                <div>Help</div>
+                <div><a href="{% url 'logout' %}">Logout</a></div>
+            </div>
+            {% comment %}
+
+               <div>
+                   {% if user.avatar.url %}
+                        <img src="{{user.avatar.url}}" height="15px" width="15px" >
+                   {% else %}
+                         <img src="{% static 'images/logout.png' %}" height="15px" width="15px" >
+                   {% endif %}
+
+                  <div style="display: ;">
+                  Are you want to logout?
+                  <div>No</div> <div><a href="{% url 'logout' %}">Yes</a></div>
+                  </div>
+               </div>
+            {% endcomment %}
+
+      </span>
+   </div>
+</div>
+
+<script src="{% static 'javascript/nav.js' %}"> </script>
+
+{% endif %}
+

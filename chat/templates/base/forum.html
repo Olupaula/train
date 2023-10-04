@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{%  load static %}
+
+{% block link %}
+    <link type="text/css" rel="stylesheet" href="{% static 'style/forum/forum.css' %}">
+{% endblock %}
+
+{% block body %}
+
+<style>
+    @font-face{
+        font-family: open_sans;
+        src: url("{% static 'fonts/Open_Sans/static/OpenSans/OpenSans-Regular.ttf' %}") format('truetype');
+    }
+
+    .post p {
+        font-family: open_sans;
+        font-size: 16px;
+    }
+</style>
+
+{# Welcome message, host and number of followers #}
+    <div id="current_user" current_user="{{user}}" current_user_id="{{user.id}}"></div>
+    <div id="current_forum" forum_id="{{forum.id}}"></div>
+
+ <div class="forum_description">
+     <h3>
+         {{forum}} forum
+    </h3>
+     <small><b>{{forum.description}}</b></small><br>
+
+
+    {% if forum.host == user %}
+    {# if the host is the current user #}
+     <small>
+            Host: You
+            {% for leader in leaders %}
+                {% if forum.host == leader.leader %}
+                        {% if leader.followers_total is not None %}
+                            <i> ( You have {{leader.followers_total}} followers ) </i>
+                        {% else %}
+                            <i>( with no followers )</i>
+                        {% endif %}
+        </small></br>
+                {% endif %}
+            {% endfor %}
+    {% else %}
+    {# if the host is not the current user #}
+        <small>
+            Host: {{forum.host}}
+            {% for leader in leaders %}
+                {% if forum.host == leader.leader %}
+                        {% if leader.number_of_followers is not None %}
+                            <i> ( With {{leader.number_of_followers}} followers ) </i>
+                        {% else %}
+                            <i>( with no followers )</i>
+                        {% endif %}
+        </small></br>
+                {% endif %}
+            {% endfor %}
+    {% endif %}
+    <small>{{forum.number_of_participants}} Participants in Forum</small><br/>
+ </div>
+
+<div class="section">
+    <div class="side_1">
+
+    </div>
+
+    <div id="post_holder">
+        {# admin dashboard #}
+        {% if user == forum.host %}
+            <div id="admin_dash_board">
+                <h3> Admin Dash Board</h3>
+                <span>
+                    Views
+                </span>
+                <span>
+                    Followers ({{host_as_leader.followers_total}})</span>
+                <span>
+                    Likes ({{host_likes_total}})
+                </span>
+                <span>
+                    Number of Posts ({{host_posts|length}})
+                </span>
+                <hr class="dividers">
+                <span>Train settings</span>
+                <hr class="dividers">
+                <span>Share space</span>
+                <hr class="dividers">
+                <span>Invite</span>
+                <span>People</span>
+                <span>Queue</span>
+                <span>Setting</span>
+                <span>Admin Log</span>
+            </div>
+        {% endif %}
+
+        {# To write new message #}
+        <div id="message_impute_div">
+            <button src1="{% static 'images/close(2).png' %}" src2="{% static 'images/edit.png' %}"
+                    id="create_button" onclick="showHideForm('create_button', 'form', 'Message', 'message_impute_div')">
+                <img src="{% static 'images/close(2).png' %}" height="15px" width="15px">
+            </button>
+            <br>
+            <form id="form" method = "POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                   {% for message in messages %}
+                        <p>{{message}}</p>
+                   {% endfor %}
+
+                {% for field in form %}
+                    {% if field.label == "Body" %}
+                        {{ field }}
+                    {% endif %}
+                {% endfor %}
+                <button id="submit_new_message" type="submit"><img src="{% static 'images/send-message.png' %}" height="20px" width="20px"></button>
+            </form>
+        </div>
+
+
+
+        {# The conversations, signatures, time and likes, follow buttons, and comment forms #}
+        <div>
+            <h4 style="text-align: center; font-family: arial, sans-serif" id="conversation_head">Conversations</h4>
+            {% if not post %}
+            <div id="s"></div>
+            {% endif %}
+
+            <div id="s" >
+            {% for post in posts %}
+                {# <hr> #}
+
+                    {# holder of src for images #}
+                    <div id="images_srcs_holder" delete ="{% static 'images/close.png' %}"></div>
+
+                    {# Posts (Messages) and  their signatures #}
+                    <div id="conversation_{{post.id}}" class="post" style="font-family: arial">
+
+                         <div class="author_details" postid_={{post.id}}>
+
+                             {# author's name #}
+                             {% if post.author == user %}
+                             <span><b>You</b></span>
+                             {% else %}
+                             <span><b>{{post.author}}</b></span>
+                             {% endif %}
+
+                             {# delete button #}
+                             {% if post.author == user %}
+                             <form  style="float:right; margin-left:30px;" class="delete_message" postId={{post.id}} >
+                                 {% csrf_token %}
+                                 <button>
+                                     <img src="{% static 'images/close.png' %}" height="12px" width=12px">
+                                 </button>
+                             </form>
+                             {% endif %}
+
+                             {# other menus like edit etc #}
+                             <img class="message_menu" id=message_menu_{{post.id}} style="float:right;" src="{% static 'images/menu(1).png' %}" height="20px" width=20px">
+
+                             {# follow buttons #}
+                             {% if user != post.author %}
+                                <form  id="follow" leader_id={{post.author_id}} _forum_id_={{forum.id}} class="follow_form" action="{% url 'update_followers' post.author_id  post.forum_id  2 %}" method="POST">
+                                    {% csrf_token %}
+                                    <button id="mb" class={{post.author_id}}fb type="submit" name="author_id" value="{{post.author_id}}" >
+                                           follow
+                                    </button>
+                                    <small class="{{post.author_id}}nf">
+                                        {% for leader in leaders %}
+                                            {% if leader.leader_id == post.author_id %}
+                                                <i>( {{leader.followers_total}} followers )</i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </small>
+                                </form>
+                            {% endif %}
+                             <br>
+
+                             {# authors credential #}
+                             {% for emc in emc %}
+                                {% if post.author_id == emc.user_em_id %}
+                               <span id="credential">
+                                   {{emc.position}} at {{emc.company_organization}} ({{emc.start_year|date:"Y"}}{% if emc.end_year %} - {{emc.end_year|date:"Y"}}{% else %}{% endif %})
+                                   . {{post.created|timesince}}
+                               </span>
+                            {# dd {{emc.start_date}} #}
+                            {% endif %}
+                            {% endfor %}
+
+                         </div>
+
+                            {# message body #}
+                            <div id=post_body_{{post.id}} style="white-space: pre-line; " class="message_body">
+                                {{post|safe}}
+                            </div>
+
+
+                            {% comment %}
+                            {# message image #}
+                            {% for image in images %}
+                                {% if image.message_id == post.id %}
+                                {# This image is to be remove eventually  <div style="text-align: center;"><img src="{{image.image.url}}" height="70%" width="300px" ><br></div> #}
+                                {% endif %}
+                            {% endfor %}
+                            {% endcomment %}
+
+
+                        <div id="comment_like_div_holder" style="background: rgb(240,240,250); display: inline-block; border-radius: 20px; margin: 10px 0 10px 0; padding: 5px; " >
+                            {# like button #}
+                            <form class="like_form" forum_id={{forum.id}} message_id={{post.id}}
+                                  src1 ="{% static 'images/like.png' %}"
+                                  src2 ="{% static 'images/thumb-up.png' %}"
+                                  method="POST">
+                                {% csrf_token %}
+                                <button id={{post.id}}lb type="submit" name="post_id" value="{{post.id}}" class="btnprimary">
+                                    {% if user in post.likes.all %}
+                                        <img src="{% static 'images/thumb-up.png' %}" height="20px" width="20px">
+                                    {% else %}
+                                        <img src="{% static 'images/like.png' %}" height="20px" width="20px">
+                                    {% endif %}
+                                </button>
+                                <small id={{post.id}}sl > {{post.likes_total}} </small>
+                            </form>
+
+                            <div style="margin-left: 10px; padding:10px; padding-right: 0; border-left: 1px solid rgb(170,170,170); display: inline-block;"></div>
+                            {# comment button #}
+                            <div class="comment_holder_div" id=comment_holder_div_{{post.id}}>
+                                <button id=b{{post.id}} onclick="showHideForm('b{{post.id}}', '{{post.id}}f', 'Comment', 'comment_holder_div_{{post.id}}')"
+                                src1="{% static 'images/speech-bubble.png' %}" src2="{% static 'images/speech-bubble.png' %}"
+                                >
+                                    <img src="{% static 'images/speech-bubble.png' %}" height="20px" width=20px">
+                                </button>
+                                <form id={{post.id}}f class="comment_form" text_area_id={{post.id}}
+                                      style="display:none"  method="POST">
+                                    {% csrf_token %}
+                                   <div class="comment_impute">
+                                        <textarea id={{post.id}} cols="40" placeholder="Make a comment..."></textarea>
+                                        <button>
+                                            <img src="{% static 'images/send-message.png' %}" height="20px" width=20px">
+                                        </button>
+                                   </div>
+                                </form>
+                            </div>
+                        </div>
+                            {# jbc means just before comment #}
+                            <small id=jbc_on_{{post.id}}></small>
+
+                            {# comments NB: cdiv means comment div #}
+                            <div class={{post.id}}cdiv style="display:block;">
+                                <span style="font-size: 12px;">Comments</span>
+                                    {% for comment in comments %}
+                                        {% if comment.message_id == post.id %}
+                                        <div class="_comment comment_display"  >
+                                            <small><b>{{comment.commenter}}</b></small><br>
+                                            <p>{{comment.comment}}</p>
+
+                                            {# takes care of likes for comments #}
+                                                <form id={{post.id}}cl class="like_comment_form" text_area_id={{post.id}}
+                                                style="display:inline;"  method="POST">
+                                                    {% csrf_token %}
+                                                    <button>
+                                                        <img src="{% static 'images/like.png' %}" height="20px" width=20px">
+                                                    </button>
+                                                </form>
+                                                <span>. {{comment.comments_likes_total}}likes</span>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                            </div>
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+
+    {# listing participants #}
+    <div id="side_3">
+        <div class="side_3_child">
+            <h3 class="side3_header"> {{forum.participants_total}} Contributors</h3>
+            {% for participant in forum.participants.all %}
+            <span>{{participant}}</span>
+            {% endfor %}
+        </div>
+        <div class="side_3_child">
+            <h3 class="side3_header">Details</h3>
+        </div>
+        <div class="side_3_child">
+            <h3 class="side3_header">Trains You May Like</h3>
+        </div>
+    </div>
+
+</div>
+
+
+
+{% comment %}
+
+{% endcomment %}
+
+<script type="module" src="{% static 'javascript/forum.js' %}"></script>
+{% endblock %}
+

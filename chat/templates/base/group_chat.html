@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block link %}
+    <link type="text/css" rel="stylesheet" href="{% static 'style/forum/join_forum.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="create_or_join">
+    <h3> Welcome to Trains. Explore your interests.</h3>
+    <a href="{% url 'create_forum' %}" >Create Train</a>
+    <a href="{% url 'join_forum' %}"> Join Train</a>
+    <br>
+</div>
+
+{% endblock %}
